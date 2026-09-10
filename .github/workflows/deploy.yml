@@ -1,0 +1,63 @@
+# 推送到 GitHub 后自动部署到你的服务器
+#
+# 需要在仓库 Settings → Secrets and variables → Actions 里配置 3 个密钥：
+#   SERVER_HOST      服务器 IP 或域名，例如 1.2.3.4
+#   SERVER_USER      登录用户名，例如 root
+#   SERVER_SSH_KEY   服务器的 SSH 私钥（把 ~/.ssh/id_ed25519 的内容整段粘贴，含首尾行）
+#
+# 工作方式：GitHub 服务器检出代码 → rsync 同步到你的服务器 → 重启服务。
+# 服务器本身不需要 GitHub 凭据，也不需要 clone 仓库。
+# 账号数据（users.json、.session_secret）不会被覆盖。
+
+name: 部署到服务器
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 也支持在 GitHub 网页上手动点一下触发
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 通过 SSH 同步并重启
+        env:
+          HOST: ${{ secrets.SERVER_HOST }}
+          USER: ${{ secrets.SERVER_USER }}
+          KEY: ${{ secrets.SERVER_SSH_KEY }}
+          DIR: /opt/creovision
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          # 1. 服务器上先备份账号数据
+          ssh -i ~/.ssh/deploy_key "$USER@$HOST" "set -e
+            cd '$DIR'
+            mkdir -p backups
+            if [ -f users.json ]; then
+              cp users.json backups/users.json.\$(date +%Y%m%d_%H%M%S)
+              ls -1t backups/users.json.* 2>/dev/null | tail -n +6 | xargs -r rm -f
+            fi"
+
+          # 2. 同步代码（排除数据与密钥文件）
+          rsync -avz --no-delete \
+            --exclude '.git' \
+            --exclude 'node_modules' \
+            --exclude 'backups' \
+            --exclude 'config.json' \
+            --exclude 'ecosystem.config.js' \
+            --exclude 'users.json' \
+            --exclude '.session_secret' \
+            --exclude 'server.log' \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new" \
+            ./ "$USER@$HOST:$DIR/"
+
+          # 3. 重启并健康检查
+          ssh -i ~/.ssh/deploy_key "$USER@$HOST" "cd '$DIR' && \
+            (pm2 restart creovision || pm2 start ecosystem.config.js) && pm2 save && \
+            sleep 1 && curl -s -m 5 http://127.0.0.1:3077/api/health"
