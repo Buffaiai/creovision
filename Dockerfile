@@ -11,7 +11,7 @@
 FROM node:18-alpine
 
 WORKDIR /app
-COPY server.js index.html favicon.svg favicon.png logo.jpg ./
+COPY server.js index.html favicon.svg favicon.png logo.png ./
 
 ENV PORT=3077
 ENV NODE_ENV=production
