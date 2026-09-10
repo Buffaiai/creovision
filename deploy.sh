@@ -35,7 +35,8 @@ fi
 
 # 3. 同步代码（排除密钥与账号数据）
 echo "→ 同步文件…"
-rsync -avz $DRY --no-delete \
+# rsync 默认不删除目标端任何文件（不使用 --delete*）
+rsync -avz $DRY \
   --exclude '.git' \
   --exclude 'node_modules' \
   --exclude 'backups' \

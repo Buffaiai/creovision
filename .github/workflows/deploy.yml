@@ -45,7 +45,8 @@ jobs:
             fi"
 
           # 2. 同步代码（排除数据与密钥文件）
-          rsync -avz --no-delete \
+          # rsync 默认就不删除目标端文件（无需 --no-delete，该选项仅 rsync>=3.3 支持）
+          rsync -avz \
             --exclude '.git' \
             --exclude 'node_modules' \
             --exclude 'backups' \
