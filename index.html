@@ -502,6 +502,113 @@
     .features { grid-template-columns: repeat(2, 1fr); }
     .gallery-grid, .work-grid { grid-template-columns: repeat(2, 1fr); }
   }
+
+  /* ===== 设置页面 ===== */
+  .settings-page {
+    display: flex; gap: 0; width: 100%; height: calc(100vh - 120px);
+    min-height: 560px; margin-top: 24px;
+  }
+  .settings-page.hide { display: none; }
+
+  /* 左侧子导航 */
+  .sp-side {
+    width: 260px; flex-shrink: 0; padding: 28px 16px;
+    background: transparent;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .sp-side .sp-title {
+    font-size: 20px; font-weight: 700; color: var(--text);
+    padding: 0 12px 24px;
+  }
+  .sp-side .sp-user {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 12px;
+    margin-bottom: 20px;
+  }
+  .sp-side .sp-user .avatar {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; font-weight: 700; color: #fff; overflow: hidden;
+  }
+  .sp-side .sp-user .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .sp-side .sp-user .mail {
+    font-size: 12.5px; color: var(--text-dim);
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .sp-side .sp-list { flex: 1; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
+  .sp-side .sp-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    font-size: 14px; color: var(--text-dim); cursor: pointer; transition: .18s;
+  }
+  .sp-side .sp-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .sp-side .sp-item:hover { background: #ffffff08; color: var(--text); }
+  .sp-side .sp-item.on { background: #ffffff10; color: var(--text); }
+  .sp-side .sp-item.danger { color: #f87171; }
+  .sp-side .sp-item.danger:hover { background: #f8717114; }
+  .sp-side .sp-divider { height: 1px; background: #ffffff12; margin: 10px 4px; }
+
+  /* 右侧卡片 */
+  .sp-card {
+    flex: 1; max-width: 800px; margin-left: 20px;
+    background: #1a1a2e80; border: 1px solid var(--card-border); border-radius: 20px;
+    box-shadow: 0 20px 60px #00000040;
+    padding: 56px 56px; overflow-y: auto;
+    display: flex; flex-direction: column;
+  }
+
+  /* 个人资料内容 */
+  .sc-profile { max-width: 480px; margin: 0 auto; width: 100%; }
+  .sc-avatar-row { display: flex; justify-content: center; margin-bottom: 40px; }
+  .sc-avatar-wrap {
+    position: relative; width: 120px; height: 120px; border-radius: 50%;
+    background: #ffffff08; border: 1px solid var(--card-border);
+    overflow: hidden; cursor: pointer;
+    transition: .2s;
+  }
+  .sc-avatar-wrap:hover { border-color: var(--purple); }
+  .sc-avatar-wrap .avatar {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #3a3560, #1e1e3a);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px; color: var(--text-faint); font-weight: 600;
+  }
+  .sc-avatar-wrap .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .sc-avatar-edit {
+    position: absolute; right: -2px; bottom: -2px;
+    width: 38px; height: 38px; border-radius: 50%;
+    background: #0f0f1e; border: 2px solid var(--card-border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text); cursor: pointer; transition: .18s;
+  }
+  .sc-avatar-edit:hover { border-color: var(--purple); color: var(--purple-light); }
+  .sc-avatar-edit svg { width: 18px; height: 18px; }
+  .sc-field { margin-bottom: 28px; }
+  .sc-field label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--text); margin-bottom: 10px;
+  }
+  .sc-field input[type="text"] {
+    width: 100%; background: #ffffff08; border: 1px solid var(--card-border);
+    outline: none; border-radius: 12px; padding: 13px 16px;
+    color: var(--text); font-size: 14px; font-family: inherit; transition: .2s;
+  }
+  .sc-field input[type="text"]:focus { border-color: var(--purple); background: #7b5cff12; }
+  .sc-field .hint { font-size: 12px; color: var(--text-faint); margin-top: 8px; }
+  .sc-field .readonly {
+    padding: 13px 16px; background: #ffffff04; border: 1px solid var(--card-border);
+    border-radius: 12px; color: var(--text-dim); font-size: 14px;
+  }
+  .sc-save-row { display: flex; justify-content: flex-end; margin-top: 16px; }
+  .sc-save-btn {
+    padding: 10px 28px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: .2s;
+  }
+  .sc-save-btn:hover { opacity: .92; transform: translateY(-1px); }
+  .sc-save-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
 </style>
 </head>
 <body data-page-node-id="dLXyRohEDHgcXQ52uXgQUF">
@@ -688,6 +795,51 @@
       </div>
     </div>
     <div class="gallery-grid" id="galleryGrid" data-page-node-id="cHeJAIFNdFQGYl64jkagsq"></div>
+  </div>
+
+  <!-- 设置页面（点击侧边栏"设置"显示） -->
+  <div class="settings-page hide" id="settingsPage">
+    <div class="sp-side">
+      <div class="sp-title">管理账户</div>
+      <div class="sp-user" id="spUser">
+        <div class="avatar" id="spUserAvatar">U</div>
+        <div class="mail" id="spUserMail">loading…</div>
+      </div>
+      <div class="sp-list">
+        <div class="sp-item on" data-sp="profile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>编辑资料
+        </div>
+        <div class="sp-item" data-sp="settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 100-7 3.5 3.5 0 000 7z"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.6 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.6-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>设置
+        </div>
+        <div class="sp-item" data-sp="credits">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>积分详情
+        </div>
+        <div class="sp-item" data-sp="orders">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>订单发票
+        </div>
+        <div class="sp-item" data-sp="pricing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>价格详情
+        </div>
+        <div class="sp-item" data-sp="apikey">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Agent API 密钥
+        </div>
+        <div class="sp-divider"></div>
+        <div class="sp-item" data-sp="terms">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>使用条款
+        </div>
+        <div class="sp-item" data-sp="privacy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>隐私政策
+        </div>
+        <div class="sp-divider"></div>
+        <div class="sp-item danger" data-sp="logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>退出登录
+        </div>
+      </div>
+    </div>
+    <div class="sp-card" id="settingsContent">
+      <!-- 内容由 JS 动态渲染 -->
+    </div>
   </div>
 </main>
 
@@ -1255,6 +1407,9 @@ document.querySelectorAll(".nav-item").forEach(n => {
   n.onclick = () => {
     document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
     n.classList.add("active");
+    if (n.dataset.nav === "设置") { openSettings(); return; }
+    // 其他导航项：如果设置页开着则先关闭
+    if (!settingsPage.classList.contains("hide")) closeSettings();
     if (n.dataset.nav !== "首页") toast(`「${n.dataset.nav}」模块开发中～`);
   };
 });
@@ -1293,24 +1448,31 @@ const authSubmit = $("#authSubmit");
 const authClose  = $("#authClose");
 const TOKEN_KEY  = "aigc_token";
 const EMAIL_KEY  = "aigc_email";
+const PROFILE_KEY = "aigc_profile";
 let authMode = "login";
 
 const getToken   = () => localStorage.getItem(TOKEN_KEY) || "";
 const setToken   = t => localStorage.setItem(TOKEN_KEY, t);
-const clearToken = () => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(EMAIL_KEY); };
+const clearToken = () => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(EMAIL_KEY); localStorage.removeItem(PROFILE_KEY); };
 
 /* 登录态 UI 成对切换：
    已登录 → 只显示账户胶囊（隐藏「注册 / 登录」）；
    未登录 → 只显示「注册 / 登录」（隐藏账户胶囊并收起菜单）。 */
-function showUser(email) {
+function showUser(email, username, avatar) {
   const mail = String(email || "");
-  const name = mail.split("@")[0] || "用户";
-  const initial = (name[0] || "U").toUpperCase();
+  const name = String(username || "").trim() || mail.split("@")[0] || "用户";
+  const hasAvatar = !!avatar;
   loginBtn.classList.add("hide");
   userChip.classList.remove("hide");
   userMail.textContent = mail;
-  userAvatar.textContent = initial;
-  umAvatar.textContent = initial;
+  if (hasAvatar) {
+    userAvatar.innerHTML = `<img src="${avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    umAvatar.innerHTML = `<img src="${avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  } else {
+    const initial = (name[0] || "U").toUpperCase();
+    userAvatar.textContent = initial;
+    umAvatar.textContent = initial;
+  }
   umName.textContent = name;
   umAccountMail.textContent = mail;
 }
@@ -1345,20 +1507,32 @@ function closeAuth() { authMask.classList.remove("show"); }
 async function fetchMe() {
   const token = getToken();
   if (!token) { hideUser(); return; }
-  // 先按本地缓存的邮箱乐观渲染账户区，避免刷新时闪烁「注册 / 登录」
-  const cached = localStorage.getItem(EMAIL_KEY);
-  if (cached) showUser(cached);
+  // 先按本地缓存的资料乐观渲染账户区，避免刷新时闪烁「注册 / 登录」
+  const cachedProfile = localStorage.getItem(PROFILE_KEY);
+  if (cachedProfile) {
+    try {
+      const p = JSON.parse(cachedProfile);
+      showUser(p.email, p.username, p.avatar);
+    } catch { /* ignore */ }
+  } else {
+    const cached = localStorage.getItem(EMAIL_KEY);
+    if (cached) showUser(cached);
+  }
   try {
     const r = await fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } });
     if (!r.ok) { clearToken(); hideUser(); return; }   // token 失效/被登出 → 完整回退到游客态
     const data = await r.json();
     if (data.ok && data.user) {
       localStorage.setItem(EMAIL_KEY, data.user.email);
-      showUser(data.user.email);
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(data.user));
+      showUser(data.user.email, data.user.username, data.user.avatar);
     } else { clearToken(); hideUser(); }
   } catch (e) {
     // 网络异常：有缓存则保留乐观登录态（生成接口 401 时会再弹登录），无缓存才回退
-    if (!cached) hideUser();
+    if (!cachedProfile) {
+      const cached = localStorage.getItem(EMAIL_KEY);
+      if (!cached) hideUser();
+    }
   }
 }
 
@@ -1384,10 +1558,17 @@ async function handleAuthSubmit(e) {
     setToken(data.token);
     const mail = (data.user && data.user.email) || email;
     localStorage.setItem(EMAIL_KEY, mail);
+    // 乐观渲染，随后 fetchMe 更新真实资料
     showUser(mail);
     closeAuth();
     authEmail.value = ""; authPwd.value = "";
     toast(authMode === "login" ? "登录成功 💪" : "注册成功，已自动登录 💪");
+    // 获取完整 profile 后，如果设置页开着则刷新内容
+    await fetchMe();
+    if (!settingsPage.classList.contains("hide")) {
+      try { currentProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null"); } catch { currentProfile = null; }
+      renderSettingsContent("profile");
+    }
   } catch (err) {
     authErr.textContent = "网络异常，无法连接服务器";
   } finally {
@@ -1428,6 +1609,204 @@ logoutBtn.addEventListener("click", e => { e.stopPropagation(); handleLogout(); 
 document.addEventListener("click", e => {
   if (!userChip.contains(e.target)) userChip.classList.remove("open");
 });
+
+/* ============================================================
+ * 设置页面（个人资料：用户名 + 头像）
+ * ============================================================ */
+const settingsPage    = $("#settingsPage");
+const settingsContent = $("#settingsContent");
+const spUserAvatar    = $("#spUserAvatar");
+const spUserMail      = $("#spUserMail");
+
+let currentProfile = null;   // 当前用户资料快照
+let avatarDraft = "";       // 头像草稿（dataURL），未保存前
+
+/* 首页内容区引用（用于切换显示） */
+const heroSection  = document.querySelector(".hero");
+const creatorSection = document.querySelector(".creator");
+const skillsSection = document.querySelector(".skills");
+const myworksSection = document.querySelector("#myworks");
+const featuresSection = document.querySelector("#features");
+const gallerySection = document.querySelector(".gallery");
+
+async function openSettings() {
+  // 确保有最新资料（未登录时 fetchMe 会静默失败）
+  await fetchMe();
+  // 从缓存取最新
+  try { currentProfile = JSON.parse(localStorage.getItem(PROFILE_KEY) || "null"); } catch { currentProfile = null; }
+  if (!currentProfile) currentProfile = { email: localStorage.getItem(EMAIL_KEY) || "", username: "", avatar: "" };
+
+  // 更新左侧用户区
+  const p = currentProfile;
+  const hasLogin = !!getToken();
+  spUserMail.textContent = hasLogin ? (p.email || "") : "未登录";
+  if (p.avatar) {
+    spUserAvatar.innerHTML = `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+  } else {
+    const n = p.username || p.email || "U";
+    spUserAvatar.textContent = (n[0] || "U").toUpperCase();
+  }
+
+  avatarDraft = p.avatar || "";
+  renderSettingsContent("profile");
+
+  // 隐藏首页内容，显示设置页
+  heroSection && heroSection.classList.add("hide");
+  creatorSection && creatorSection.classList.add("hide");
+  skillsSection && skillsSection.classList.add("hide");
+  myworksSection && myworksSection.classList.add("hide");
+  featuresSection && featuresSection.classList.add("hide");
+  gallerySection && gallerySection.classList.add("hide");
+  settingsPage.classList.remove("hide");
+}
+
+function closeSettings() {
+  // 隐藏设置页，恢复首页内容
+  settingsPage.classList.add("hide");
+  heroSection && heroSection.classList.remove("hide");
+  creatorSection && creatorSection.classList.remove("hide");
+  skillsSection && skillsSection.classList.remove("hide");
+  myworksSection && myworksSection.classList.remove("hide");
+  featuresSection && featuresSection.classList.remove("hide");
+  gallerySection && gallerySection.classList.remove("hide");
+}
+
+/* 左侧子导航切换 */
+document.querySelectorAll(".sp-item").forEach(item => {
+  item.addEventListener("click", () => {
+    const key = item.dataset.sp;
+    // 退出登录特殊处理
+    if (key === "logout") {
+      handleLogout().then(() => {
+        // 退出后刷新设置页内容（变为未登录态）
+        currentProfile = { email: "", username: "", avatar: "" };
+        avatarDraft = "";
+        spUserMail.textContent = "未登录";
+        spUserAvatar.textContent = "U";
+        renderSettingsContent("profile");
+      });
+      return;
+    }
+    document.querySelectorAll(".sp-item").forEach(x => x.classList.remove("on"));
+    item.classList.add("on");
+    renderSettingsContent(key);
+  });
+});
+
+function renderSettingsContent(key) {
+  const p = currentProfile || {};
+  const hasLogin = !!getToken();
+  if (key === "profile") {
+    // 未登录 → 显示登录引导
+    if (!hasLogin) {
+      settingsContent.innerHTML = `
+        <div class="sc-profile" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56" opacity=".4"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <div style="font-size:16px;color:var(--text-dim)">登录后可管理个人资料</div>
+          <button class="sc-save-btn" id="scLoginBtn" style="padding:12px 48px">立即登录 / 注册</button>
+        </div>`;
+      $("#scLoginBtn").addEventListener("click", () => openAuth("login"));
+      return;
+    }
+    const initial = (p.username || p.email || "U").charAt(0).toUpperCase();
+    const avatarHTML = avatarDraft
+      ? `<div class="avatar"><img src="${avatarDraft}"></div>`
+      : `<div class="avatar">${initial}</div>`;
+    settingsContent.innerHTML = `
+      <div class="sc-profile">
+        <div class="sc-avatar-row">
+          <div class="sc-avatar-wrap" id="scAvatarWrap">
+            ${avatarHTML}
+            <input type="file" id="scAvatarInput" accept="image/*" style="display:none">
+            <div class="sc-avatar-edit" title="更换头像">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="sc-field">
+          <label>用户名</label>
+          <input type="text" id="scUsername" placeholder="输入用户名" value="${p.username || ""}" maxlength="40">
+          <div class="hint">长度 1-40 个字符，支持字母、数字、"-"、"_"和中文。</div>
+        </div>
+        <div class="sc-field">
+          <label>邮箱</label>
+          <div class="readonly">${p.email || ""}</div>
+        </div>
+        <div class="sc-save-row">
+          <button class="sc-save-btn" id="scSaveBtn">保存修改</button>
+        </div>
+      </div>
+    `;
+    // 绑定头像上传
+    const wrap = $("#scAvatarWrap");
+    const fileInput = $("#scAvatarInput");
+    wrap.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { toast("头像图片不能超过 2MB"); return; }
+      if (!file.type.startsWith("image/")) { toast("请选择图片文件"); return; }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        avatarDraft = ev.target.result;
+        wrap.innerHTML = `
+          <div class="avatar"><img src="${avatarDraft}"></div>
+          <input type="file" id="scAvatarInput" accept="image/*" style="display:none">
+          <div class="sc-avatar-edit" title="更换头像">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>`;
+        wrap.addEventListener("click", () => fileInput.click());
+      };
+      reader.readAsDataURL(file);
+    });
+    $("#scSaveBtn").addEventListener("click", saveProfile);
+  } else {
+    const label = document.querySelector(`.sp-item[data-sp="${key}"]`)?.textContent.trim() || "";
+    settingsContent.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-faint);gap:12px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" opacity=".5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <div style="font-size:14px">「${label}」模块开发中～</div>
+      </div>`;
+  }
+}
+
+async function saveProfile() {
+  const username = $("#scUsername").value.trim();
+  if (!username) { toast("用户名不能为空"); return; }
+  if (username.length > 40) { toast("用户名不能超过 40 个字符"); return; }
+  if (!/^[a-zA-Z0-9\-_一-龥]+$/.test(username)) { toast("用户名只支持字母、数字、\"-\"、\"_\"和中文"); return; }
+
+  const btn = $("#scSaveBtn");
+  btn.disabled = true; btn.textContent = "保存中…";
+  try {
+    const r = await fetch("/api/auth/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + getToken() },
+      body: JSON.stringify({ username, avatar: avatarDraft })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok || !data.ok) { toast(data.error || "保存失败"); return; }
+    // 更新本地缓存 + UI
+    currentProfile = data.user;
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(data.user));
+    localStorage.setItem(EMAIL_KEY, data.user.email);
+    showUser(data.user.email, data.user.username, data.user.avatar);
+    // 更新设置页左侧用户区
+    spUserMail.textContent = data.user.email;
+    if (data.user.avatar) {
+      spUserAvatar.innerHTML = `<img src="${data.user.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    } else {
+      const n = data.user.username || data.user.email.split("@")[0] || "U";
+      spUserAvatar.textContent = (n[0] || "U").toUpperCase();
+    }
+    toast("已保存 ✅");
+    btn.textContent = "保存修改";
+  } catch (e) {
+    toast("网络异常，保存失败");
+  } finally {
+    btn.disabled = false;
+  }
+}
 
 /* 启动：若本地已有登录态则恢复 */
 fetchMe();

@@ -325,7 +325,34 @@ const server = http.createServer(async (req, res) => {
   if (p === "/api/auth/me" && req.method === "GET") {
     const u = authUser(req);
     if (!u) return send(res, 401, { error: "未登录" });
-    return send(res, 200, { ok: true, user: { email: u.email, createdAt: u.createdAt } });
+    return send(res, 200, { ok: true, user: { email: u.email, username: u.username || "", avatar: u.avatar || "", createdAt: u.createdAt } });
+  }
+
+  // ---- 更新个人资料（用户名 / 头像） ----
+  if (p === "/api/auth/profile" && req.method === "POST") {
+    const u = authUser(req);
+    if (!u) return send(res, 401, { error: "未登录" });
+    try {
+      const { username, avatar } = await readBody(req);
+      const db = loadUsers();
+      const user = db.users.find(x => x.email === u.email);
+      if (!user) return send(res, 404, { error: "用户不存在" });
+
+      if (username !== undefined) {
+        const name = String(username).trim();
+        if (name.length > 40) return send(res, 400, { error: "用户名不能超过 40 个字符" });
+        if (name && !/^[a-zA-Z0-9\-_一-龥]+$/.test(name)) return send(res, 400, { error: "用户名只支持字母、数字、\"-\"、\"_\"和中文" });
+        user.username = name;
+      }
+      if (avatar !== undefined) {
+        const a = String(avatar);
+        // 限制头像 dataURL 大小 ~2MB
+        if (a.length > 2 * 1024 * 1024) return send(res, 400, { error: "头像图片不能超过 2MB" });
+        user.avatar = a;
+      }
+      saveUsers(db);
+      return send(res, 200, { ok: true, user: { email: user.email, username: user.username || "", avatar: user.avatar || "", createdAt: user.createdAt } });
+    } catch (e) { return send(res, 500, { error: e.message }); }
   }
 
   if (p === "/api/auth/logout" && req.method === "POST") {
