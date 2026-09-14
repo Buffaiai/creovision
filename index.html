@@ -480,19 +480,22 @@
   .feature {
     background: linear-gradient(160deg, #15152b, #0f0f1a);
     border: 1px solid var(--card-border); border-radius: var(--radius);
-    padding: 22px 22px 26px; cursor: pointer; transition: .3s; position: relative; overflow: hidden;
-  }
-  .feature::after {
-    content: ""; position: absolute; inset: 0;
-    background: radial-gradient(300px 160px at 80% 120%, #7b5cff22, transparent);
-    opacity: 0; transition: .3s;
+    padding: 0; cursor: pointer; transition: .3s; position: relative; overflow: hidden;
   }
   .feature:hover { transform: translateY(-5px); border-color: #7b5cff55; }
-  .feature:hover::after { opacity: 1; }
-  .feature h4 { font-size: 17px; font-weight: 700; }
-  .feature p { font-size: 12.5px; color: var(--text-dim); margin-top: 8px; }
-  .feature .icons { display: flex; gap: 6px; margin-top: 18px; }
-  .feature .mini { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--card-border); }
+  .feature .f-thumb {
+    width: 100%; aspect-ratio: 16/9; position: relative;
+    background-size: cover; background-position: center;
+    background-color: #1a1a2e;
+    border-bottom: 1px solid var(--card-border);
+  }
+  .feature .f-icon {
+    position: absolute; bottom: 8px; left: 10px;
+    font-size: 22px; line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.6));
+  }
+  .feature h4 { font-size: 16px; font-weight: 700; padding: 16px 18px 0; }
+  .feature p { font-size: 12px; color: var(--text-dim); padding: 6px 18px 18px; margin: 0; }
 
   /* ===== 作品广场 ===== */
   .gallery { max-width: 1150px; margin: 70px auto 0; }
@@ -506,13 +509,25 @@
   .gcard {
     border-radius: var(--radius); overflow: hidden; cursor: pointer;
     border: 1px solid var(--card-border); background: var(--bg-soft);
-    transition: .3s; position: relative;
+    transition: .3s cubic-bezier(.2,.7,.3,1); position: relative;
   }
-  .gcard:hover { transform: translateY(-4px); border-color: #7b5cff55; box-shadow: 0 14px 40px #00000088; }
-  .gcard .cover { aspect-ratio: 16/9; position: relative; }
+  .gcard:hover { transform: translateY(-5px); border-color: #a48aff66; box-shadow: 0 18px 44px -12px rgba(123,92,255,.35); }
+  .gcard .cover {
+    aspect-ratio: 16/9; position: relative;
+    background-size: cover; background-position: center;
+    background-color: #1a1a2e;
+  }
   .gcard .badge {
     position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 6px;
     background: #000000a0; backdrop-filter: blur(6px); font-size: 11px; color: #cfd3ea;
+  }
+  .gcard .play {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 36px; color: #ffffff00; background: #00000000;
+    transition: .25s;
+  }
+  .gcard:hover .play {
+    color: #ffffffdd; background: linear-gradient(180deg, #00000000 40%, #00000066 100%);
   }
   .gcard .info { padding: 12px 14px 14px; }
   .gcard .info h5 { font-size: 14px; font-weight: 600; }
@@ -1801,41 +1816,52 @@ $("#clearWorks").addEventListener("click", () => {
   toast("已清空创作记录（重新生成不受影响）");
 });
 
-const SKILL_BASE = "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?image_size=square_hd&prompt=";
+/* 主题图工具：Unsplash 关键词匹配真实照片，稳定 CDN 加速 */
+const U = (kw) => `https://source.unsplash.com/400x400/?${encodeURIComponent(kw)}`;
 const skills = [
   { name: "Y2K 3D 千禧风", cat: "热门玩法", desc: "塑料光泽 × 金属糖果色",
-    img: SKILL_BASE + encodeURIComponent("Y2K 3D glossy chrome metallic pink blue gradient spheres, millennium futuristic aesthetic, shiny plastic bubbles, ultra vibrant, cute cyber aesthetic, studio lighting, high quality") },
+    img: U("y2k,glossy,chrome,metallic,colorful,abstract") },
   { name: "日系夏天 MV", cat: "热门玩法", desc: "夏日阳光 × 清新胶片感",
-    img: SKILL_BASE + encodeURIComponent("Japanese summer MV aesthetic, golden sunlight through green leaves, soft film grain, lens flare, blue sky and clouds, casual girl walking on seaside road, warm nostalgic tone, cinematic") },
+    img: U("japanese,summer,sunlight,film,seaside,road") },
   { name: "杂志风大片", cat: "热门玩法", desc: "高级质感 × 极简构图",
-    img: SKILL_BASE + encodeURIComponent("Vogue magazine style fashion editorial, minimalist composition, dramatic lighting, elegant model, clean background, high contrast, cinematic color grading, professional photography") },
+    img: U("fashion,magazine,editorial,minimal,dramatic,portrait") },
   { name: "JOJO 风格变身", cat: "热门玩法", desc: "夸张姿态 × 霓虹波普",
-    img: SKILL_BASE + encodeURIComponent("JOJO anime style transformation scene, dynamic pose, bold outlines, neon pop colors, dramatic action, stylized manga aesthetic, vibrant pink and teal, expressive characters") },
+    img: U("anime,neon,pop,colorful,abstract,dynamic") },
   { name: "赛博朋克街拍", cat: "热门玩法", desc: "霓虹雨夜 × 未来都市",
-    img: SKILL_BASE + encodeURIComponent("Cyberpunk street photography, rainy night, neon signs reflecting on wet streets, futuristic Tokyo, purple and pink glow, cinematic wide angle, moody atmosphere") },
+    img: U("cyberpunk,tokyo,neon,night,rain,future") },
   { name: "古风仙侠短片", cat: "剧情短片", desc: "白衣飘飘 × 水墨意境",
-    img: SKILL_BASE + encodeURIComponent("Chinese ancient xianxia drama, elegant white-robed swordsman standing on misty mountain peak, ink wash painting aesthetic, bamboo forest, soft fog, ethereal atmosphere, traditional Chinese art style") },
+    img: U("chinese,ancient,mountain,mist,bamboo,traditional") },
   { name: "青春校园剧", cat: "剧情短片", desc: "蓝天白云 × 夏日球场",
-    img: SKILL_BASE + encodeURIComponent("Youth campus drama scene, sunny basketball court, blue sky with white clouds, teenage students in school uniforms, cherry blossom petals falling, warm sunlight, nostalgic atmosphere") },
+    img: U("basketball,court,summer,sun,cherry,blossom") },
   { name: "微光精灵入镜", cat: "剧情短片", desc: "森林深处 × 梦幻光斑",
-    img: SKILL_BASE + encodeURIComponent("Enchanted forest with glowing fairy lights, fireflies floating, dreamy bokeh, magical atmosphere, deep green foliage, soft golden light rays through trees, whimsical fantasy") },
+    img: U("enchanted,forest,fireflies,fairy,lights,dreamy") },
   { name: "无人机运镜", cat: "商业广告", desc: "上帝视角 × 宏大叙事",
-    img: SKILL_BASE + encodeURIComponent("Aerial drone cinematography, sweeping landscape shot, golden hour, mountain vista with winding river, cinematic wide angle, epic scale, professional commercial advertising style") },
+    img: U("drone,aerial,mountain,landscape,river,golden,hour") },
   { name: "机甲变形特效", cat: "商业广告", desc: "金属重机 × 炸裂特效",
-    img: SKILL_BASE + encodeURIComponent("Giant mecha robot transformation, metallic armor plates, sparks and energy effects, dramatic smoke, cinematic lighting, futuristic battlefield, high detail, explosive action") },
+    img: U("robot,mecha,sci-fi,futuristic,metal,smoke") },
   { name: "汽水广告", cat: "商业广告", desc: "水珠飞溅 × 清凉一夏",
-    img: SKILL_BASE + encodeURIComponent("Commercial soda advertisement, ice cold soda can with water droplets splashing, bright summer blue sky, refreshing lemon and ice cubes, vibrant colors, professional product photography") },
+    img: U("soda,water,splash,ice,cold,product,blue") },
   { name: "说唱 MV", cat: "音乐 / MV", desc: "街头态度 × 灯光炸裂",
-    img: SKILL_BASE + encodeURIComponent("Hip hop rap music video scene, neon-lit city street at night, rapper with mic, dynamic camera angle, colorful graffiti wall, energetic mood, cinematic lighting") },
+    img: U("hiphop,rapper,graffiti,neon,city,night,street") },
   { name: "钢琴抒情 MV", cat: "音乐 / MV", desc: "黑白琴键 × 泪光朦胧",
-    img: SKILL_BASE + encodeURIComponent("Emotional piano music video, close up of black and white piano keys, soft spotlight, teary eye in background, dark concert hall atmosphere, moody cinematic lighting, melancholic") },
+    img: U("piano,keys,music,concert,hall,dark,spotlight") },
 ];
+/* 图片兜底：加载失败时回退到主题渐变（全局处理） */
+window._imgFallback = function(el, palIdx, ang = 120) {
+  const p = palettes[(palIdx || 0) % palettes.length];
+  const a = (ang + (palIdx * 47) % 120) + "deg";
+  el.style.backgroundImage = `linear-gradient(${a}, ${p[0]}, ${p[1]})`;
+  el.style.backgroundSize = "cover";
+  el.style.backgroundColor = p[0];
+};
 let activeSkillCat = "热门玩法";
+/* 给所有 skill-card thumb 加兜底 */
 function renderSkills() {
   const list = skills.filter(s => activeSkillCat === "全部" || s.cat === activeSkillCat);
   $("#skillCards").innerHTML = list.map((s, i) => `
     <div class="skill-card" onclick="useSkill('${s.name}')">
-      <div class="thumb" style="background-image:url('${s.img}')">
+      <div class="thumb" style="background-image:url('${s.img}')"
+           onerror="_imgFallback(this,${i})">
         <div class="thumb-grad"></div>
         <span class="cat-tag">${s.cat}</span>
       </div>
@@ -1865,34 +1891,40 @@ document.querySelector(".skills-head .more").addEventListener("click", () => {
 });
 
 const features = [
-  { t: "创作一键流", d: "简单操作，成片无忧" },
-  { t: "无限画布", d: "创意驰骋，随心造景" },
-  { t: "海量资产", d: "海量资产，随心调用" },
-  { t: "剧本广场", d: "优质内容，随心甄选" },
+  { t: "创作一键流", d: "上传剧本 → 自动分镜 → 一键直出", icon: "🎬", img: U("film,cinema,clapperboard,production") },
+  { t: "无限画布", d: "自由排版多镜头 · 实时预览合成", icon: "🖼️", img: U("canvas,paint,brush,art,creative") },
+  { t: "剧本广场", d: "海量 IP 剧本 · 一键授权开拍", icon: "📖", img: U("book,script,writing,paper,story") },
+  { t: "资产素材库", d: "角色/场景/道具 · 沉淀复用", icon: "📦", img: U("warehouse,box,storage,organize") },
 ];
 $("#features").innerHTML = features.map((f, i) => `
   <div class="feature" onclick="toast('「${f.t}」模块开发中，敬请期待')">
+    <div class="f-thumb" style="background-image:url('${f.img}')" onerror="_imgFallback(this,${i+3})">
+      <span class="f-icon">${f.icon}</span>
+    </div>
     <h4>${f.t}</h4><p>${f.d}</p>
-    <div class="icons">${[0,1,2].map(k => `<div class="mini" style="${grad(i + k, 5)}"></div>`).join("")}</div>
   </div>`).join("");
 
 const galleryWorks = [
-  { t: "限时狂欢月 · 城市竞速", cat: "TVC", author: "StudioNeo", likes: "1.2w" },
-  { t: "双探 · 荒漠迷城", cat: "影视", author: "光影旅人", likes: "9860" },
-  { t: "竹笛少女 · 山水间", cat: "MV", author: "南音社", likes: "8452" },
-  { t: "深夜食堂 · AI 篇", cat: "短剧", author: "一碗剧场", likes: "7210" },
-  { t: "星轨漫游指南", cat: "漫剧", author: "OrbitWorks", likes: "6933" },
-  { t: "机械之心 · 觉醒", cat: "影视", author: "GearBox", likes: "6104" },
-  { t: "霓虹夜市 · 赛博日记", cat: "短剧", author: "霓虹小队", likes: "5877" },
-  { t: "山海经 · 青鸾", cat: "MV", author: "拾遗录", likes: "5402" },
-  { t: "夏日气泡水广告", cat: "TVC", author: "泡泡工厂", likes: "4988" },
+  { t: "限时狂欢月 · 城市竞速", cat: "TVC", author: "StudioNeo", likes: "1.2w", img: U("city,night,car,speed,racing,neon") },
+  { t: "双探 · 荒漠迷城", cat: "影视", author: "光影旅人", likes: "9860", img: U("desert,city,ancient,ruins,adventure,cinematic") },
+  { t: "竹笛少女 · 山水间", cat: "MV", author: "南音社", likes: "8452", img: U("chinese,pipa,bamboo,mountain,mist,traditional") },
+  { t: "深夜食堂 · AI 篇", cat: "短剧", author: "一碗剧场", likes: "7210", img: U("restaurant,night,japanese,food,warm,light") },
+  { t: "星轨漫游指南", cat: "漫剧", author: "OrbitWorks", likes: "6933", img: U("galaxy,space,star,universe,cosmos,astronomy") },
+  { t: "机械之心 · 觉醒", cat: "影视", author: "GearBox", likes: "6104", img: U("robot,cyborg,ai,sci-fi,futuristic,dark") },
+  { t: "霓虹夜市 · 赛博日记", cat: "短剧", author: "霓虹小队", likes: "5877", img: U("cyberpunk,neon,night,market,asia,city") },
+  { t: "山海经 · 青鸾", cat: "MV", author: "拾遗录", likes: "5402", img: U("phoenix,bird,chinese,myth,ancient,legend") },
+  { t: "夏日气泡水广告", cat: "TVC", author: "泡泡工厂", likes: "4988", img: U("soda,water,bubble,summer,cold,blue,fresh") },
 ];
 let cat = "全部";
 function renderGallery() {
   const list = galleryWorks.filter(w => cat === "全部" || w.cat === cat);
   $("#galleryGrid").innerHTML = list.map((w, i) => `
     <div class="gcard" onclick="toast('播放《${w.t}》· 示例作品')">
-      <div class="cover" style="${grad(i + cat.length, 2)}"><span class="badge">${w.cat}</span></div>
+      <div class="cover" style="background-image:url('${w.img}')"
+           onerror="_imgFallback(this,${i+cat.length})">
+        <span class="badge">${w.cat}</span>
+        <span class="play">▶</span>
+      </div>
       <div class="info"><h5>${w.t}</h5>
         <div class="meta"><span>@${w.author}</span><span>❤ ${w.likes}</span></div>
       </div>
