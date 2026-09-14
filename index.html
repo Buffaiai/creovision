@@ -1021,7 +1021,8 @@
             <svg class="caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l5 5 5-5"/></svg>
             <div class="model-popover compact" id="ratioPopover"></div>
           </div>
-          <div class="param" id="secParam" data-page-node-id="ykyaRt3smTTM7x1LrmEvan"><label data-page-node-id="vEXbZ1ayJ19f5EXS7P1ApX">时长</label>
+          <div class="param param-trigger" id="secParam" data-trigger="secPopover" data-page-node-id="ykyaRt3smTTM7x1LrmEvan">
+            <label data-page-node-id="vEXbZ1ayJ19f5EXS7P1ApX">时长</label>
             <select id="secSel" data-page-node-id="3Nl8IE06UqIXDyS0HWnxWX">
               <option value="4" data-page-node-id="kITwUQdaK5AGUBCAoCSX6S">4 秒</option>
               <option value="5" selected data-page-node-id="dHOd5hat4XYpDXkZ2qhOWP">5 秒</option>
@@ -1030,6 +1031,9 @@
               <option value="10" data-page-node-id="KQ7YFPPKhKkndrqXKsrIsL">10 秒</option>
               <option value="12" data-page-node-id="ucKY41oD1XFFcfp0orseAf">12 秒</option>
             </select>
+            <span class="trigger-current" id="secCurrentName">5 秒</span>
+            <svg class="caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l5 5 5-5"/></svg>
+            <div class="model-popover compact" id="secPopover"></div>
           </div>
         </div>
         <button class="send-btn" id="sendBtn" data-page-node-id="KqVw2JDsNYrhybDvmFlQ6Y">
@@ -1405,6 +1409,7 @@ function applyMode(m) {
     .map((x, i) => `<option value="${x.v}" ${i === 0 ? "selected" : ""}>${x.n}</option>`).join("");
   $("#sizeCurrentName").textContent = $("#sizeSel").value;
   $("#ratioCurrentName").textContent = $("#ratioSel").selectedOptions[0].text;
+  $("#secCurrentName").textContent = $("#secSel").selectedOptions[0].text;
   // 显隐
   $("#refUploadRow").classList.toggle("show", m === "i2i");
   $("#refUrlRow").classList.toggle("show", m === "i2v");
@@ -1522,6 +1527,24 @@ function renderRatioPopover() {
     };
   });
 }
+function renderSecPopover() {
+  const pop = $("#secPopover");
+  const cur = $("#secSel").value;
+  pop.innerHTML = `<div class="model-group-title">时长</div>` +
+    [...$("#secSel").options].map(o => `
+      <div class="model-card ${o.value === cur ? "active" : ""}" data-v="${o.value}">
+        <div class="model-info"><div class="model-name">${o.text}</div></div>
+        <div class="model-pick">${o.value === cur ? "✓" : ""}</div>
+      </div>`).join("");
+  pop.querySelectorAll(".model-card").forEach(c => {
+    c.onclick = () => {
+      const v = c.dataset.v;
+      $("#secSel").value = v;
+      $("#secCurrentName").textContent = c.querySelector(".model-name").textContent;
+      closeAllPopovers();
+    };
+  });
+}
 // param-trigger 点击切换
 document.querySelectorAll(".param-trigger").forEach(trig => {
   trig.addEventListener("click", e => {
@@ -1533,6 +1556,7 @@ document.querySelectorAll(".param-trigger").forEach(trig => {
     if (!already) {
       if (popId === "sizePopover") renderSizePopover();
       else if (popId === "ratioPopover") renderRatioPopover();
+      else if (popId === "secPopover") renderSecPopover();
       pop.classList.add("open");
       trig.classList.add("open");
     }
