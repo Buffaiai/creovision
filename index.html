@@ -1826,35 +1826,36 @@ $("#clearWorks").addEventListener("click", () => {
   toast("已清空创作记录（重新生成不受影响）");
 });
 
-/* 主题图工具：Picsum CDN（Cloudflare 加速，国内可达），seed 固定结果 */
-const U = (seed, w = 400, h = 400) => `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
+/* 主题图工具：走本地 /api/skill-image（首次调 Agnes AI 生成，之后本地缓存） */
+const U = (seed, prompt, ratio = "1:1") =>
+  `/api/skill-image?seed=${encodeURIComponent(seed)}&ratio=${ratio}&prompt=${encodeURIComponent(prompt)}`;
 const skills = [
   { name: "Y2K 3D 千禧风", cat: "热门玩法", desc: "塑料光泽 × 金属糖果色",
-    img: U("y2k-chrome") },
+    img: U("y2k-chrome", "Y2K 3D glossy chrome metallic pink blue gradient spheres, millennium futuristic aesthetic, shiny plastic bubbles, ultra vibrant, cute cyber aesthetic, studio lighting, high quality") },
   { name: "日系夏天 MV", cat: "热门玩法", desc: "夏日阳光 × 清新胶片感",
-    img: U("japanese-summer-seaside") },
+    img: U("japanese-summer", "Japanese summer MV aesthetic, golden sunlight through green leaves, soft film grain, lens flare, blue sky and clouds, warm nostalgic tone, cinematic") },
   { name: "杂志风大片", cat: "热门玩法", desc: "高级质感 × 极简构图",
-    img: U("vogue-fashion-editorial") },
+    img: U("vogue-editorial", "Vogue magazine style fashion editorial, minimalist composition, dramatic lighting, elegant model, clean background, high contrast, cinematic color grading, professional photography") },
   { name: "JOJO 风格变身", cat: "热门玩法", desc: "夸张姿态 × 霓虹波普",
-    img: U("jojo-anime-neon") },
+    img: U("jojo-transform", "JOJO anime style transformation scene, dynamic pose, bold outlines, neon pop colors, dramatic action, stylized manga aesthetic, vibrant pink and teal, expressive characters") },
   { name: "赛博朋克街拍", cat: "热门玩法", desc: "霓虹雨夜 × 未来都市",
-    img: U("cyberpunk-tokyo-night") },
+    img: U("cyberpunk-tokyo", "Cyberpunk street photography, rainy night, neon signs reflecting on wet streets, futuristic Tokyo, purple and pink glow, cinematic wide angle, moody atmosphere") },
   { name: "古风仙侠短片", cat: "剧情短片", desc: "白衣飘飘 × 水墨意境",
-    img: U("xianxia-mountain-mist") },
+    img: U("xianxia-mist", "Chinese ancient xianxia drama, elegant white-robed swordsman standing on misty mountain peak, ink wash painting aesthetic, bamboo forest, soft fog, ethereal atmosphere") },
   { name: "青春校园剧", cat: "剧情短片", desc: "蓝天白云 × 夏日球场",
-    img: U("basketball-court-sun") },
+    img: U("basketball-summer", "Youth campus drama scene, sunny basketball court, blue sky with white clouds, cherry blossom petals falling, warm sunlight, nostalgic atmosphere") },
   { name: "微光精灵入镜", cat: "剧情短片", desc: "森林深处 × 梦幻光斑",
-    img: U("enchanted-forest-fireflies") },
+    img: U("enchanted-forest", "Enchanted forest with glowing fairy lights, fireflies floating, dreamy bokeh, magical atmosphere, deep green foliage, soft golden light rays, whimsical fantasy") },
   { name: "无人机运镜", cat: "商业广告", desc: "上帝视角 × 宏大叙事",
-    img: U("drone-aerial-mountain") },
+    img: U("aerial-mountain", "Aerial drone cinematography, sweeping landscape shot, golden hour, mountain vista with winding river, cinematic wide angle, epic scale, professional") },
   { name: "机甲变形特效", cat: "商业广告", desc: "金属重机 × 炸裂特效",
-    img: U("mecha-robot-sci-fi") },
+    img: U("mecha-transform", "Giant mecha robot transformation, metallic armor plates, sparks and energy effects, dramatic smoke, cinematic lighting, futuristic battlefield, explosive action") },
   { name: "汽水广告", cat: "商业广告", desc: "水珠飞溅 × 清凉一夏",
-    img: U("soda-water-splash") },
+    img: U("soda-splash", "Commercial soda advertisement, ice cold soda can with water droplets splashing, bright summer blue sky, refreshing lemon and ice cubes, vibrant colors, product photography") },
   { name: "说唱 MV", cat: "音乐 / MV", desc: "街头态度 × 灯光炸裂",
-    img: U("hiphop-rapper-neon") },
+    img: U("hiphop-neon", "Hip hop rap music video scene, neon-lit city street at night, rapper with mic, dynamic camera angle, colorful graffiti wall, energetic mood, cinematic lighting") },
   { name: "钢琴抒情 MV", cat: "音乐 / MV", desc: "黑白琴键 × 泪光朦胧",
-    img: U("piano-keys-concert-hall") },
+    img: U("piano-tears", "Emotional piano music video, close up of black and white piano keys, soft spotlight, melancholic atmosphere, dark concert hall, moody cinematic lighting") },
 ];
 /* 图片兜底：加载失败时回退到主题渐变 */
 window._imgFallback = function(el, palIdx) {
@@ -1899,10 +1900,14 @@ document.querySelector(".skills-head .more").addEventListener("click", () => {
 });
 
 const features = [
-  { t: "创作一键流", d: "上传剧本 → 自动分镜 → 一键直出", icon: "🎬", img: U("film-production-clapperboard", 600, 338) },
-  { t: "无限画布", d: "自由排版多镜头 · 实时预览合成", icon: "🖼️", img: U("canvas-paint-creative", 600, 338) },
-  { t: "剧本广场", d: "海量 IP 剧本 · 一键授权开拍", icon: "📖", img: U("book-script-writing", 600, 338) },
-  { t: "资产素材库", d: "角色/场景/道具 · 沉淀复用", icon: "📦", img: U("warehouse-storage-organize", 600, 338) },
+  { t: "创作一键流", d: "上传剧本 → 自动分镜 → 一键直出", icon: "🎬",
+    img: U("feature-flow", "AI film production, clapperboard, cinematic, movie set, professional filmmaking, high quality", "16:9") },
+  { t: "无限画布", d: "自由排版多镜头 · 实时预览合成", icon: "🖼️",
+    img: U("feature-canvas", "digital art canvas, creative painting, software interface, modern design tool, colorful brushes", "16:9") },
+  { t: "剧本广场", d: "海量 IP 剧本 · 一键授权开拍", icon: "📖",
+    img: U("feature-script", "movie script, screenplay writing, film storyboard, desk with papers, professional screenwriter", "16:9") },
+  { t: "资产素材库", d: "角色/场景/道具 · 沉淀复用", icon: "📦",
+    img: U("feature-assets", "digital asset library, 3D models warehouse, organized storage, character avatars on shelves, futuristic", "16:9") },
 ];
 $("#features").innerHTML = features.map((f, i) => `
   <div class="feature" onclick="toast('「${f.t}」模块开发中，敬请期待')">
@@ -1914,15 +1919,24 @@ $("#features").innerHTML = features.map((f, i) => `
   </div>`).join("");
 
 const galleryWorks = [
-  { t: "限时狂欢月 · 城市竞速", cat: "TVC", author: "StudioNeo", likes: "1.2w", img: U("city-car-speed-racing", 600, 338) },
-  { t: "双探 · 荒漠迷城", cat: "影视", author: "光影旅人", likes: "9860", img: U("desert-ancient-ruins", 600, 338) },
-  { t: "竹笛少女 · 山水间", cat: "MV", author: "南音社", likes: "8452", img: U("chinese-bamboo-mountain", 600, 338) },
-  { t: "深夜食堂 · AI 篇", cat: "短剧", author: "一碗剧场", likes: "7210", img: U("restaurant-night-japanese", 600, 338) },
-  { t: "星轨漫游指南", cat: "漫剧", author: "OrbitWorks", likes: "6933", img: U("galaxy-space-stars", 600, 338) },
-  { t: "机械之心 · 觉醒", cat: "影视", author: "GearBox", likes: "6104", img: U("robot-cyborg-sci-fi", 600, 338) },
-  { t: "霓虹夜市 · 赛博日记", cat: "短剧", author: "霓虹小队", likes: "5877", img: U("cyberpunk-neon-market", 600, 338) },
-  { t: "山海经 · 青鸾", cat: "MV", author: "拾遗录", likes: "5402", img: U("phoenix-bird-myth", 600, 338) },
-  { t: "夏日气泡水广告", cat: "TVC", author: "泡泡工厂", likes: "4988", img: U("soda-water-bubble-summer", 600, 338) },
+  { t: "限时狂欢月 · 城市竞速", cat: "TVC", author: "StudioNeo", likes: "1.2w",
+    img: U("gal-city-race", "cinematic city at night, fast car racing, neon lights, motion blur, commercial TVC style, epic", "16:9") },
+  { t: "双探 · 荒漠迷城", cat: "影视", author: "光影旅人", likes: "9860",
+    img: U("gal-desert-city", "ancient ruined city in desert, mysterious atmosphere, cinematic wide shot, adventure, dust, epic lighting", "16:9") },
+  { t: "竹笛少女 · 山水间", cat: "MV", author: "南音社", likes: "8452",
+    img: U("gal-bamboo-girl", "Chinese traditional bamboo flute, mountain landscape with mist, ink wash style, elegant, soft light, MV scene", "16:9") },
+  { t: "深夜食堂 · AI 篇", cat: "短剧", author: "一碗剧场", likes: "7210",
+    img: U("gal-night-diner", "cozy Japanese diner at night, warm lantern light, steam rising from food, intimate atmosphere, cinematic", "16:9") },
+  { t: "星轨漫游指南", cat: "漫剧", author: "OrbitWorks", likes: "6933",
+    img: U("gal-galaxy-travel", "galaxy space exploration, star trails, nebula colors, spaceship, wonder cosmic background, epic scale", "16:9") },
+  { t: "机械之心 · 觉醒", cat: "影视", author: "GearBox", likes: "6104",
+    img: U("gal-robot-awaken", "cyborg robot awakening, glowing blue eyes, metallic body, sparks, sci-fi laboratory, dramatic lighting", "16:9") },
+  { t: "霓虹夜市 · 赛博日记", cat: "短剧", author: "霓虹小队", likes: "5877",
+    img: U("gal-cyber-market", "cyberpunk night market, neon signs, asian street food, rain reflections, crowd, futuristic, vibrant", "16:9") },
+  { t: "山海经 · 青鸾", cat: "MV", author: "拾遗录", likes: "5402",
+    img: U("gal-qingluan", "Chinese mythological phoenix bird, ancient legend, flying through clouds, traditional art style, golden feathers, epic", "16:9") },
+  { t: "夏日气泡水广告", cat: "TVC", author: "泡泡工厂", likes: "4988",
+    img: U("gal-soda-bubble", "refreshing soda bubbles, ice cold drink, summer blue sky, water droplets splashing, bright, cheerful, product ad", "16:9") },
 ];
 let cat = "全部";
 function renderGallery() {

@@ -100,19 +100,36 @@ if (!AGNES_KEY) {
 }
 
 /* ---------- Agnes 请求封装 ---------- */
+let _tlsRetry = false; // 避免无限递归
+function _isCertError(e) {
+  const msg = (e.message || "") + " " + (e.cause?.message || "");
+  const code = e.cause?.code || "";
+  return msg.includes("certificate") || code === "UNABLE_TO_GET_ISSUER_CERT_LOCALLY";
+}
 async function agnesFetch(pathname, method, body) {
-  const res = await fetch(AGNES_BASE + pathname, {
-    method: method || "GET",
-    headers: {
-      "Authorization": "Bearer " + AGNES_KEY,
-      ...(body ? { "Content-Type": "application/json" } : {}),
-    },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch { json = { raw: text }; }
-  return { status: res.status, json };
+  try {
+    const res = await fetch(AGNES_BASE + pathname, {
+      method: method || "GET",
+      headers: {
+        "Authorization": "Bearer " + AGNES_KEY,
+        ...(body ? { "Content-Type": "application/json" } : {}),
+      },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch { json = { raw: text }; }
+    return { status: res.status, json };
+  } catch (e) {
+    // SSL 证书错误：macOS Node 有时验证失败，重试时禁用校验（仅一次）
+    if (!_tlsRetry && _isCertError(e)) {
+      _tlsRetry = true;
+      console.warn("[agnesFetch] SSL 证书错误，重试时跳过验证");
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+      return agnesFetch(pathname, method, body);
+    }
+    throw e;
+  }
 }
 
 function readBody(req) {
@@ -237,6 +254,81 @@ async function handleDownload(req, res, target) {
   }
 }
 
+/* ---------- Skill 主题图：AI 生成 + 本地缓存 ---------- */
+const SKILLS_DIR = path.join(__dirname, "public", "skills");
+try { fs.mkdirSync(SKILLS_DIR, { recursive: true }); } catch (e) {}
+
+function safeSeed(s) {
+  return String(s || "skill").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
+}
+
+async function handleSkillImage(req, res, url) {
+  const seed = safeSeed(url.searchParams.get("seed") || "skill");
+  const prompt = url.searchParams.get("prompt") || "";
+  const size = url.searchParams.get("size") || "1K";
+  const ratio = url.searchParams.get("ratio") || "1:1";
+  const cacheFile = path.join(SKILLS_DIR, seed + ".jpg");
+
+  // 1. 缓存命中 → 直接返回文件
+  if (fs.existsSync(cacheFile)) {
+    const stat = fs.statSync(cacheFile);
+    res.writeHead(200, {
+      "Content-Type": "image/jpeg",
+      "Content-Length": stat.size,
+      "Cache-Control": "public, max-age=86400", // 浏览器缓存 1 天
+      "X-Skill-Cache": "hit",
+    });
+    return fs.createReadStream(cacheFile).pipe(res);
+  }
+
+  // 2. 没 prompt → 返回占位渐变 JPEG（纯色图，让 img 不报错）
+  if (!prompt || !AGNES_KEY) {
+    const placeholder = Buffer.from(
+      "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Afw==",
+      "base64"
+    );
+    res.writeHead(200, { "Content-Type": "image/jpeg", "Content-Length": placeholder.length });
+    return res.end(placeholder);
+  }
+
+  // 3. 调 Agnes 生图
+  try {
+    const r = await handleImage({ model: "agnes-image-2.1-flash", prompt, size, ratio });
+    const imgUrl = r.json?.data?.[0]?.url || r.json?.data?.[0]?.b64_json;
+    if (!imgUrl) throw new Error("Agnes 未返回图片: " + JSON.stringify(r.json).slice(0, 120));
+
+    let buf;
+    if (typeof imgUrl === "string" && imgUrl.startsWith("data:")) {
+      // base64 格式
+      buf = Buffer.from(imgUrl.split(",")[1] || "", "base64");
+    } else {
+      // URL 格式：下载后缓存
+      const upstream = await fetch(imgUrl, { method: "GET" });
+      if (!upstream.ok) throw new Error("下载失败 " + upstream.status);
+      buf = Buffer.from(await upstream.arrayBuffer());
+    }
+
+    fs.writeFileSync(cacheFile, buf);
+
+    res.writeHead(200, {
+      "Content-Type": "image/jpeg",
+      "Content-Length": buf.length,
+      "Cache-Control": "public, max-age=86400",
+      "X-Skill-Cache": "miss-generated",
+    });
+    return res.end(buf);
+  } catch (e) {
+    // 生成失败 → 返回占位 JPEG（但保留错误 header 方便排查）
+    console.error("[skill-image]", seed, "生成失败:", e.message);
+    const placeholder = Buffer.from(
+      "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Afw==",
+      "base64"
+    );
+    res.writeHead(200, { "Content-Type": "image/jpeg", "Content-Length": placeholder.length, "X-Skill-Error": e.message.slice(0, 80) });
+    return res.end(placeholder);
+  }
+}
+
 /* ---------- HTTP 服务 ---------- */
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, "http://localhost");
@@ -249,6 +341,9 @@ const server = http.createServer(async (req, res) => {
     image: ["agnes-image-2.0-flash", "agnes-image-2.1-flash"],
     video: ["agnes-video-2.5-flash", "agnes-video-v2.0"],
   }});
+
+  // Skill 主题图（AI 生成 + 本地缓存）
+  if (p === "/api/skill-image") return handleSkillImage(req, res, url);
 
   if (p === "/api/image" && req.method === "POST") {
     if (REQUIRE_LOGIN && !authUser(req)) return send(res, 401, { error: "请先登录后再生成" });
