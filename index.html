@@ -130,6 +130,7 @@
     color: var(--text); font-size: 13px; transition: .2s;
   }
   .user-chip:hover { background: #ffffff17; }
+  .hide { display: none !important; }
   .user-chip.hide { display: none; }
   .user-chip .avatar {
     width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
@@ -141,14 +142,37 @@
   .user-chip .caret { width: 10px; height: 6px; color: var(--text-faint); transition: transform .25s; }
   .user-chip.open .caret { transform: rotate(180deg); }
   .user-menu {
-    display: none; position: absolute; right: 0; top: calc(100% + 8px);
-    background: #15152bee; border: 1px solid var(--card-border); border-radius: 12px;
-    padding: 6px; min-width: 130px; box-shadow: 0 14px 40px #000000aa;
-    backdrop-filter: blur(14px); z-index: 60;
+    display: none; position: absolute; right: 0; top: calc(100% + 10px);
+    width: 232px; padding: 8px;
+    background: #15152bf2; border: 1px solid var(--card-border); border-radius: 16px;
+    box-shadow: 0 18px 50px #000000bb;
+    backdrop-filter: blur(16px); z-index: 60; overflow: hidden;
   }
-  .user-chip.open .user-menu { display: block; }
-  .um-item { padding: 9px 12px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: .2s; }
-  .um-item:hover { background: #ffffff0a; color: #f87171; }
+  .user-chip.open .user-menu { display: block; animation: umPop .18s ease; }
+  @keyframes umPop { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+  .um-head { display: flex; align-items: center; gap: 11px; padding: 10px 10px 12px; }
+  .um-head .mini-avatar {
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; color: #fff;
+  }
+  .um-head .name { font-size: 14.5px; font-weight: 600; color: var(--text); }
+  .um-divider { height: 1px; background: #ffffff12; margin: 6px 4px; }
+  .um-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px; border-radius: 10px; font-size: 13.5px;
+    color: var(--text-dim); cursor: pointer; transition: .18s;
+  }
+  .um-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .um-item:hover { background: #ffffff0a; color: var(--text); }
+  .um-item.info { cursor: default; }
+  .um-item.info:hover { background: transparent; color: var(--text-dim); }
+  .um-item .val {
+    margin-left: auto; font-size: 12px; color: var(--text-faint);
+    max-width: 108px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .um-item.danger:hover { background: #f8717114; color: #f87171; }
 
   /* ===== 登录 / 注册弹窗 ===== */
   .auth-mask {
@@ -501,15 +525,10 @@
   <div class="nav-item" data-nav="资产" data-page-node-id="s9wfynZGrMtWSPXzrUnFoL">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="S7wzHmaD6O9zhFnoJcAfBT"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" data-page-node-id="Jz0wDsVwt9pNaUizw0rAzW"/><path d="M4 7l8 4 8-4M12 11v10" data-page-node-id="gzhBprI5B9wZZTFz8YU80T"/></svg>资产
   </div>
-  <div class="nav-item" data-nav="空间" data-page-node-id="HxC0Qg6FrjbjmrymqjmQx9">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="U6KXYcE8AL3MFGCCQxAojW"><circle cx="12" cy="12" r="9" data-page-node-id="KomLuNdW68qiHAEhthU0Tz"/><path d="M3 12h18M12 3c3 3.5 3 14 0 18-3-4-3-14.5 0-18z" data-page-node-id="0SkJtyH4CxQXh52irJW3YZ"/></svg>空间
-  </div>
-  <div class="nav-item" data-nav="团队" data-page-node-id="q8AABOnoSrRqn4G5Vei3dO">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="HtxP2zBFdXAxvJYECavOHv"><circle cx="9" cy="8" r="3.5" data-page-node-id="N0m9682Y5qXBZOEWJFjI9y"/><path d="M2.5 20c.8-3.5 3.4-5 6.5-5s5.7 1.5 6.5 5" data-page-node-id="k2N81Q7SJHBvzuSD0XZUHz"/><circle cx="17.5" cy="9.5" r="2.5" data-page-node-id="Lr5W9gLmhvmcVjojaRnncS"/><path d="M16 14.5c2.8.3 4.7 1.8 5.5 4.5" data-page-node-id="kG2QQjcwWDSSCASwaGRfGN"/></svg>团队
-  </div>
+
   <div class="nav-bottom" data-page-node-id="NS3SarwPniA3SuKBAWO0w2">
-    <div class="nav-item" data-nav="反馈" data-page-node-id="k0GKThxBoVWgk5wzpUCGOd">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="bH57WcShx7GPbW1uSKJEgl"><circle cx="12" cy="12" r="9" data-page-node-id="xDHIhm7q0P26GQn8IA4Jym"/><path d="M12 8v5M12 16.5v.01" data-page-node-id="FJh0wHNnFx8LRei82EWLXj"/></svg>反馈
+    <div class="nav-item" data-nav="设置" data-page-node-id="k0GKThxBoVWgk5wzpUCGOd">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="bH57WcShx7GPbW1uSKJEgl"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" data-page-node-id="xDHIhm7q0P26GQn8IA4Jym"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" data-page-node-id="FJh0wHNnFx8LRei82EWLXj"/></svg>设置
     </div>
   </div>
 </aside>
@@ -524,7 +543,20 @@
         <span class="mail" id="userMail"></span>
         <svg class="caret" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l5 5 5-5"/></svg>
         <div class="user-menu" id="userMenu">
-          <div class="um-item" id="logoutBtn">退出登录</div>
+          <div class="um-head">
+            <span class="mini-avatar" id="umAvatar">U</span>
+            <span class="name" id="umName">用户</span>
+          </div>
+          <div class="um-item info" id="umAccount">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.6-3 7.8-7 9-4-1.2-7-4.4-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>
+            <span>账号</span>
+            <span class="val" id="umAccountMail"></span>
+          </div>
+          <div class="um-divider"></div>
+          <div class="um-item danger" id="logoutBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H4"/></svg>
+            <span>退出登录</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1247,7 +1279,9 @@ const loginBtn   = $("#loginBtn");
 const userChip   = $("#userChip");
 const userMail   = $("#userMail");
 const userAvatar = $("#userAvatar");
-const userMenu   = $("#userMenu");
+const umAvatar      = $("#umAvatar");
+const umName        = $("#umName");
+const umAccountMail = $("#umAccountMail");
 const logoutBtn  = $("#logoutBtn");
 const authTitle  = $("#authTitle");
 const authSub    = $("#authSub");
@@ -1258,20 +1292,31 @@ const authErr    = $("#authErr");
 const authSubmit = $("#authSubmit");
 const authClose  = $("#authClose");
 const TOKEN_KEY  = "aigc_token";
+const EMAIL_KEY  = "aigc_email";
 let authMode = "login";
 
 const getToken   = () => localStorage.getItem(TOKEN_KEY) || "";
 const setToken   = t => localStorage.setItem(TOKEN_KEY, t);
-const clearToken = () => localStorage.removeItem(TOKEN_KEY);
+const clearToken = () => { localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(EMAIL_KEY); };
 
+/* 登录态 UI 成对切换：
+   已登录 → 只显示账户胶囊（隐藏「注册 / 登录」）；
+   未登录 → 只显示「注册 / 登录」（隐藏账户胶囊并收起菜单）。 */
 function showUser(email) {
+  const mail = String(email || "");
+  const name = mail.split("@")[0] || "用户";
+  const initial = (name[0] || "U").toUpperCase();
   loginBtn.classList.add("hide");
   userChip.classList.remove("hide");
-  userMail.textContent = email;
-  userAvatar.textContent = (email[0] || "U").toUpperCase();
+  userMail.textContent = mail;
+  userAvatar.textContent = initial;
+  umAvatar.textContent = initial;
+  umName.textContent = name;
+  umAccountMail.textContent = mail;
 }
 function hideUser() {
   userChip.classList.add("hide");
+  userChip.classList.remove("open");
   loginBtn.classList.remove("hide");
   userMail.textContent = "";
 }
@@ -1299,13 +1344,22 @@ function closeAuth() { authMask.classList.remove("show"); }
 
 async function fetchMe() {
   const token = getToken();
-  if (!token) return;
+  if (!token) { hideUser(); return; }
+  // 先按本地缓存的邮箱乐观渲染账户区，避免刷新时闪烁「注册 / 登录」
+  const cached = localStorage.getItem(EMAIL_KEY);
+  if (cached) showUser(cached);
   try {
     const r = await fetch("/api/auth/me", { headers: { Authorization: "Bearer " + token } });
-    if (!r.ok) { clearToken(); hideUser(); return; }
+    if (!r.ok) { clearToken(); hideUser(); return; }   // token 失效/被登出 → 完整回退到游客态
     const data = await r.json();
-    if (data.ok && data.user) showUser(data.user.email);
-  } catch (e) { clearToken(); hideUser(); }
+    if (data.ok && data.user) {
+      localStorage.setItem(EMAIL_KEY, data.user.email);
+      showUser(data.user.email);
+    } else { clearToken(); hideUser(); }
+  } catch (e) {
+    // 网络异常：有缓存则保留乐观登录态（生成接口 401 时会再弹登录），无缓存才回退
+    if (!cached) hideUser();
+  }
 }
 
 async function handleAuthSubmit(e) {
@@ -1328,7 +1382,9 @@ async function handleAuthSubmit(e) {
       return;
     }
     setToken(data.token);
-    showUser((data.user && data.user.email) || email);
+    const mail = (data.user && data.user.email) || email;
+    localStorage.setItem(EMAIL_KEY, mail);
+    showUser(mail);
     closeAuth();
     authEmail.value = ""; authPwd.value = "";
     toast(authMode === "login" ? "登录成功 💪" : "注册成功，已自动登录 💪");
@@ -1348,7 +1404,6 @@ async function handleLogout() {
   } catch (e) {}
   clearToken();
   hideUser();
-  userMenu.classList.remove("show");
   toast("已退出登录");
 }
 
@@ -1363,8 +1418,13 @@ authTabs.addEventListener("click", e => {
 authSubmit.addEventListener("click", handleAuthSubmit);
 authPwd.addEventListener("keydown", e => { if (e.key === "Enter") handleAuthSubmit(e); });
 authEmail.addEventListener("keydown", e => { if (e.key === "Enter") handleAuthSubmit(e); });
-userChip.addEventListener("click", e => { e.stopPropagation(); userMenu.classList.toggle("show"); });
-logoutBtn.addEventListener("click", handleLogout);
+userChip.addEventListener("click", e => {
+  e.stopPropagation();
+  // 点击菜单内部（如「退出登录」）不切换展开态，避免冒泡把菜单又打开
+  if (e.target.closest(".user-menu")) return;
+  userChip.classList.toggle("open");
+});
+logoutBtn.addEventListener("click", e => { e.stopPropagation(); handleLogout(); });
 document.addEventListener("click", e => {
   if (!userChip.contains(e.target)) userChip.classList.remove("open");
 });
