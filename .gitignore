@@ -14,3 +14,7 @@ users.json
 .DS_Store
 node_modules/
 server.log
+
+# AI 生成的 Skill 主题图缓存（首次访问自动生成，不入版本库）
+public/skills/*.jpg
+public/skills/*.png
