@@ -406,7 +406,11 @@
   .skill-card .thumb {
     position: relative; width: 100%; aspect-ratio: 1/1;
     background-size: cover; background-position: center; background-color: #1a1a2e;
-    flex-shrink: 0;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .skill-card .thumb > img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block; pointer-events: none;
   }
   .skill-card .thumb-grad {
     position: absolute; inset: 0;
@@ -484,10 +488,13 @@
   }
   .feature:hover { transform: translateY(-5px); border-color: #7b5cff55; }
   .feature .f-thumb {
-    width: 100%; aspect-ratio: 16/9; position: relative;
-    background-size: cover; background-position: center;
+    width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden;
     background-color: #1a1a2e;
     border-bottom: 1px solid var(--card-border);
+  }
+  .feature .f-thumb > img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block; pointer-events: none;
   }
   .feature .f-icon {
     position: absolute; bottom: 8px; left: 10px;
@@ -513,9 +520,12 @@
   }
   .gcard:hover { transform: translateY(-5px); border-color: #a48aff66; box-shadow: 0 18px 44px -12px rgba(123,92,255,.35); }
   .gcard .cover {
-    aspect-ratio: 16/9; position: relative;
-    background-size: cover; background-position: center;
+    aspect-ratio: 16/9; position: relative; overflow: hidden;
     background-color: #1a1a2e;
+  }
+  .gcard .cover > img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; display: block; pointer-events: none;
   }
   .gcard .badge {
     position: absolute; top: 10px; left: 10px; padding: 3px 10px; border-radius: 6px;
@@ -1816,52 +1826,50 @@ $("#clearWorks").addEventListener("click", () => {
   toast("已清空创作记录（重新生成不受影响）");
 });
 
-/* 主题图工具：Unsplash 关键词匹配真实照片，稳定 CDN 加速 */
-const U = (kw) => `https://source.unsplash.com/400x400/?${encodeURIComponent(kw)}`;
+/* 主题图工具：Picsum CDN（Cloudflare 加速，国内可达），seed 固定结果 */
+const U = (seed, w = 400, h = 400) => `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
 const skills = [
   { name: "Y2K 3D 千禧风", cat: "热门玩法", desc: "塑料光泽 × 金属糖果色",
-    img: U("y2k,glossy,chrome,metallic,colorful,abstract") },
+    img: U("y2k-chrome") },
   { name: "日系夏天 MV", cat: "热门玩法", desc: "夏日阳光 × 清新胶片感",
-    img: U("japanese,summer,sunlight,film,seaside,road") },
+    img: U("japanese-summer-seaside") },
   { name: "杂志风大片", cat: "热门玩法", desc: "高级质感 × 极简构图",
-    img: U("fashion,magazine,editorial,minimal,dramatic,portrait") },
+    img: U("vogue-fashion-editorial") },
   { name: "JOJO 风格变身", cat: "热门玩法", desc: "夸张姿态 × 霓虹波普",
-    img: U("anime,neon,pop,colorful,abstract,dynamic") },
+    img: U("jojo-anime-neon") },
   { name: "赛博朋克街拍", cat: "热门玩法", desc: "霓虹雨夜 × 未来都市",
-    img: U("cyberpunk,tokyo,neon,night,rain,future") },
+    img: U("cyberpunk-tokyo-night") },
   { name: "古风仙侠短片", cat: "剧情短片", desc: "白衣飘飘 × 水墨意境",
-    img: U("chinese,ancient,mountain,mist,bamboo,traditional") },
+    img: U("xianxia-mountain-mist") },
   { name: "青春校园剧", cat: "剧情短片", desc: "蓝天白云 × 夏日球场",
-    img: U("basketball,court,summer,sun,cherry,blossom") },
+    img: U("basketball-court-sun") },
   { name: "微光精灵入镜", cat: "剧情短片", desc: "森林深处 × 梦幻光斑",
-    img: U("enchanted,forest,fireflies,fairy,lights,dreamy") },
+    img: U("enchanted-forest-fireflies") },
   { name: "无人机运镜", cat: "商业广告", desc: "上帝视角 × 宏大叙事",
-    img: U("drone,aerial,mountain,landscape,river,golden,hour") },
+    img: U("drone-aerial-mountain") },
   { name: "机甲变形特效", cat: "商业广告", desc: "金属重机 × 炸裂特效",
-    img: U("robot,mecha,sci-fi,futuristic,metal,smoke") },
+    img: U("mecha-robot-sci-fi") },
   { name: "汽水广告", cat: "商业广告", desc: "水珠飞溅 × 清凉一夏",
-    img: U("soda,water,splash,ice,cold,product,blue") },
+    img: U("soda-water-splash") },
   { name: "说唱 MV", cat: "音乐 / MV", desc: "街头态度 × 灯光炸裂",
-    img: U("hiphop,rapper,graffiti,neon,city,night,street") },
+    img: U("hiphop-rapper-neon") },
   { name: "钢琴抒情 MV", cat: "音乐 / MV", desc: "黑白琴键 × 泪光朦胧",
-    img: U("piano,keys,music,concert,hall,dark,spotlight") },
+    img: U("piano-keys-concert-hall") },
 ];
-/* 图片兜底：加载失败时回退到主题渐变（全局处理） */
-window._imgFallback = function(el, palIdx, ang = 120) {
+/* 图片兜底：加载失败时回退到主题渐变 */
+window._imgFallback = function(el, palIdx) {
   const p = palettes[(palIdx || 0) % palettes.length];
-  const a = (ang + (palIdx * 47) % 120) + "deg";
-  el.style.backgroundImage = `linear-gradient(${a}, ${p[0]}, ${p[1]})`;
-  el.style.backgroundSize = "cover";
-  el.style.backgroundColor = p[0];
+  const ang = 120 + (palIdx * 47) % 120;
+  el.parentElement.style.backgroundImage = `linear-gradient(${ang}deg, ${p[0]}, ${p[1]})`;
+  el.style.display = "none";
 };
 let activeSkillCat = "热门玩法";
-/* 给所有 skill-card thumb 加兜底 */
 function renderSkills() {
   const list = skills.filter(s => activeSkillCat === "全部" || s.cat === activeSkillCat);
   $("#skillCards").innerHTML = list.map((s, i) => `
     <div class="skill-card" onclick="useSkill('${s.name}')">
-      <div class="thumb" style="background-image:url('${s.img}')"
-           onerror="_imgFallback(this,${i})">
+      <div class="thumb" style="${grad(i, 3)}">
+        <img src="${s.img}" loading="lazy" onerror="_imgFallback(this,${i})" alt="">
         <div class="thumb-grad"></div>
         <span class="cat-tag">${s.cat}</span>
       </div>
@@ -1891,37 +1899,38 @@ document.querySelector(".skills-head .more").addEventListener("click", () => {
 });
 
 const features = [
-  { t: "创作一键流", d: "上传剧本 → 自动分镜 → 一键直出", icon: "🎬", img: U("film,cinema,clapperboard,production") },
-  { t: "无限画布", d: "自由排版多镜头 · 实时预览合成", icon: "🖼️", img: U("canvas,paint,brush,art,creative") },
-  { t: "剧本广场", d: "海量 IP 剧本 · 一键授权开拍", icon: "📖", img: U("book,script,writing,paper,story") },
-  { t: "资产素材库", d: "角色/场景/道具 · 沉淀复用", icon: "📦", img: U("warehouse,box,storage,organize") },
+  { t: "创作一键流", d: "上传剧本 → 自动分镜 → 一键直出", icon: "🎬", img: U("film-production-clapperboard", 600, 338) },
+  { t: "无限画布", d: "自由排版多镜头 · 实时预览合成", icon: "🖼️", img: U("canvas-paint-creative", 600, 338) },
+  { t: "剧本广场", d: "海量 IP 剧本 · 一键授权开拍", icon: "📖", img: U("book-script-writing", 600, 338) },
+  { t: "资产素材库", d: "角色/场景/道具 · 沉淀复用", icon: "📦", img: U("warehouse-storage-organize", 600, 338) },
 ];
 $("#features").innerHTML = features.map((f, i) => `
   <div class="feature" onclick="toast('「${f.t}」模块开发中，敬请期待')">
-    <div class="f-thumb" style="background-image:url('${f.img}')" onerror="_imgFallback(this,${i+3})">
+    <div class="f-thumb" style="${grad(i+3, 5)}">
+      <img src="${f.img}" loading="lazy" onerror="_imgFallback(this,${i+3})" alt="">
       <span class="f-icon">${f.icon}</span>
     </div>
     <h4>${f.t}</h4><p>${f.d}</p>
   </div>`).join("");
 
 const galleryWorks = [
-  { t: "限时狂欢月 · 城市竞速", cat: "TVC", author: "StudioNeo", likes: "1.2w", img: U("city,night,car,speed,racing,neon") },
-  { t: "双探 · 荒漠迷城", cat: "影视", author: "光影旅人", likes: "9860", img: U("desert,city,ancient,ruins,adventure,cinematic") },
-  { t: "竹笛少女 · 山水间", cat: "MV", author: "南音社", likes: "8452", img: U("chinese,pipa,bamboo,mountain,mist,traditional") },
-  { t: "深夜食堂 · AI 篇", cat: "短剧", author: "一碗剧场", likes: "7210", img: U("restaurant,night,japanese,food,warm,light") },
-  { t: "星轨漫游指南", cat: "漫剧", author: "OrbitWorks", likes: "6933", img: U("galaxy,space,star,universe,cosmos,astronomy") },
-  { t: "机械之心 · 觉醒", cat: "影视", author: "GearBox", likes: "6104", img: U("robot,cyborg,ai,sci-fi,futuristic,dark") },
-  { t: "霓虹夜市 · 赛博日记", cat: "短剧", author: "霓虹小队", likes: "5877", img: U("cyberpunk,neon,night,market,asia,city") },
-  { t: "山海经 · 青鸾", cat: "MV", author: "拾遗录", likes: "5402", img: U("phoenix,bird,chinese,myth,ancient,legend") },
-  { t: "夏日气泡水广告", cat: "TVC", author: "泡泡工厂", likes: "4988", img: U("soda,water,bubble,summer,cold,blue,fresh") },
+  { t: "限时狂欢月 · 城市竞速", cat: "TVC", author: "StudioNeo", likes: "1.2w", img: U("city-car-speed-racing", 600, 338) },
+  { t: "双探 · 荒漠迷城", cat: "影视", author: "光影旅人", likes: "9860", img: U("desert-ancient-ruins", 600, 338) },
+  { t: "竹笛少女 · 山水间", cat: "MV", author: "南音社", likes: "8452", img: U("chinese-bamboo-mountain", 600, 338) },
+  { t: "深夜食堂 · AI 篇", cat: "短剧", author: "一碗剧场", likes: "7210", img: U("restaurant-night-japanese", 600, 338) },
+  { t: "星轨漫游指南", cat: "漫剧", author: "OrbitWorks", likes: "6933", img: U("galaxy-space-stars", 600, 338) },
+  { t: "机械之心 · 觉醒", cat: "影视", author: "GearBox", likes: "6104", img: U("robot-cyborg-sci-fi", 600, 338) },
+  { t: "霓虹夜市 · 赛博日记", cat: "短剧", author: "霓虹小队", likes: "5877", img: U("cyberpunk-neon-market", 600, 338) },
+  { t: "山海经 · 青鸾", cat: "MV", author: "拾遗录", likes: "5402", img: U("phoenix-bird-myth", 600, 338) },
+  { t: "夏日气泡水广告", cat: "TVC", author: "泡泡工厂", likes: "4988", img: U("soda-water-bubble-summer", 600, 338) },
 ];
 let cat = "全部";
 function renderGallery() {
   const list = galleryWorks.filter(w => cat === "全部" || w.cat === cat);
   $("#galleryGrid").innerHTML = list.map((w, i) => `
     <div class="gcard" onclick="toast('播放《${w.t}》· 示例作品')">
-      <div class="cover" style="background-image:url('${w.img}')"
-           onerror="_imgFallback(this,${i+cat.length})">
+      <div class="cover" style="${grad(i+2, cat.length)}">
+        <img src="${w.img}" loading="lazy" onerror="_imgFallback(this,${i+2})" alt="">
         <span class="badge">${w.cat}</span>
         <span class="play">▶</span>
       </div>
