@@ -609,7 +609,240 @@
   }
   .sc-save-btn:hover { opacity: .92; transform: translateY(-1px); }
   .sc-save-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ===== 创作页面 ===== */
+  .create-page { padding: 60px 40px; max-width: 900px; margin: 0 auto; }
+  .create-page.hide { display: none; }
+  .cp-title {
+    font-size: 44px; font-weight: 800; text-align: center;
+    background: linear-gradient(100deg, var(--purple), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 12px;
+  }
+  .cp-sub { text-align: center; font-size: 16px; color: var(--text-faint); letter-spacing: 4px; margin-bottom: 40px; }
+  .cp-upload {
+    background: linear-gradient(160deg, #1a1a2e, #12121f);
+    border: 1px solid var(--card-border); border-radius: 16px;
+    padding: 80px 40px 60px; text-align: center;
+  }
+  .cp-upload.drag { border-color: var(--purple); background: #7b5cff0c; }
+  .cp-files { display: flex; justify-content: center; align-items: flex-end; gap: -20px; margin-bottom: 32px; }
+  .cp-file {
+    width: 80px; height: 100px; border-radius: 10px; margin: 0 -12px;
+    background: #2a2a4a80; border: 1px solid var(--card-border);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; color: var(--text-faint);
+  }
+  .cp-file svg { width: 28px; height: 28px; }
+  .cp-file .label { font-size: 11px; font-weight: 600; }
+  .cp-file.center { z-index: 2; background: #3a3a5a80; border-color: var(--purple); color: var(--text); }
+  .cp-hint { font-size: 18px; color: var(--text); margin-bottom: 10px; }
+  .cp-subhint { font-size: 13px; color: var(--text-faint); margin-bottom: 32px; }
+  .cp-btns { display: flex; justify-content: center; gap: 20px; }
+  .cp-btn {
+    padding: 14px 36px; border-radius: 12px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: .2s; display: inline-flex; align-items: center; gap: 8px;
+    border: 1px solid transparent;
+  }
+  .cp-btn svg { width: 18px; height: 18px; }
+  .cp-btn.primary { background: #fff; color: #0f0f1e; border-color: #fff; }
+  .cp-btn.primary:hover { opacity: .9; transform: translateY(-1px); }
+  .cp-btn.ghost { background: transparent; color: var(--text); border-color: var(--card-border); }
+  .cp-btn.ghost:hover { background: #ffffff08; border-color: var(--text-dim); }
+  .cp-paste-mask {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: #000000cc; backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .cp-paste-mask.show { display: flex; animation: fade .2s ease; }
+  .cp-paste-modal {
+    width: 560px; max-width: 92vw; padding: 28px;
+    background: linear-gradient(160deg, #171730, #101020);
+    border: 1px solid var(--card-border); border-radius: 18px;
+    box-shadow: 0 24px 70px #000000cc;
+  }
+  .cp-paste-modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+  .cp-paste-modal textarea {
+    width: 100%; height: 280px; resize: none;
+    background: #ffffff08; border: 1px solid var(--card-border);
+    border-radius: 12px; padding: 14px; color: var(--text); font-size: 14px;
+    outline: none; font-family: inherit; transition: .2s;
+  }
+  .cp-paste-modal textarea:focus { border-color: var(--purple); background: #7b5cff12; }
+  .cp-paste-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+
+  /* ===== 资产页面 ===== */
+  .assets-page { padding: 24px 0; }
+  .assets-page.hide { display: none; }
+  .as-tabs { display: flex; gap: 32px; margin-bottom: 20px; }
+  .as-tab {
+    font-size: 20px; font-weight: 600; color: var(--text-faint);
+    cursor: pointer; padding-bottom: 10px; position: relative; transition: .2s;
+  }
+  .as-tab:hover { color: var(--text-dim); }
+  .as-tab.on { color: var(--text); }
+  .as-tab.on::after {
+    content: ""; position: absolute; bottom: 0; left: 0;
+    width: 100%; height: 3px; border-radius: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--pink));
+  }
+  .as-sub-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; }
+  .as-sub-tabs {
+    display: flex; gap: 4px; background: #ffffff08; padding: 4px; border-radius: 999px;
+  }
+  .as-sub-tab {
+    padding: 8px 22px; border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    cursor: pointer; transition: .2s; font-weight: 500;
+  }
+  .as-sub-tab.on {
+    background: #fff; color: #0f0f1e; font-weight: 600;
+  }
+  .as-batch-btn {
+    padding: 8px 18px; border-radius: 10px; border: 1px solid var(--card-border);
+    background: transparent; color: var(--text-dim); font-size: 13px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: .2s;
+  }
+  .as-batch-btn svg { width: 16px; height: 16px; }
+  .as-batch-btn:hover { background: #ffffff08; color: var(--text); }
+  .as-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 120px 40px; color: var(--text-faint); gap: 20px;
+  }
+  .as-empty-ico {
+    width: 180px; height: 160px; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .as-empty-ico svg { width: 100%; height: 100%; filter: drop-shadow(0 8px 30px #7b5cff33); }
+  .as-empty-text { font-size: 14px; letter-spacing: 1px; }
+
+  /* ===== 画布页面 ===== */
+  .canvas-page { display: none; height: calc(100vh - 40px); overflow: hidden; }
+  .canvas-page.show { display: flex; }
+  /* 左侧工具栏 */
+  .cv-toolbar {
+    width: 56px; background: #1a1a2e; border-right: 1px solid var(--card-border);
+    display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px;
+  }
+  .cv-tool {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-dim); transition: .15s; position: relative;
+  }
+  .cv-tool svg { width: 20px; height: 20px; }
+  .cv-tool:hover { background: #ffffff0a; color: var(--text); }
+  .cv-tool.on { background: linear-gradient(135deg, var(--purple), #ff6bb540); color: #fff; }
+  .cv-sep { width: 28px; height: 1px; background: #ffffff14; margin: 8px 0; }
+  /* 顶部栏 */
+  .cv-topbar {
+    height: 48px; background: #1a1a2e; border-bottom: 1px solid var(--card-border);
+    display: flex; align-items: center; padding: 0 16px; gap: 16px;
+  }
+  .cv-topbar select, .cv-topbar input[type=number] {
+    background: #ffffff08; border: 1px solid var(--card-border); border-radius: 8px;
+    color: var(--text); padding: 6px 10px; font-size: 13px; outline: none; width: 110px;
+  }
+  .cv-topbar label { font-size: 12px; color: var(--text-faint); }
+  .cv-topbar .cv-size-group { display: flex; align-items: center; gap: 8px; }
+  .cv-topbar .cv-size-group input { width: 70px; }
+  .cv-topbar .cv-spacer { flex: 1; }
+  .cv-btn {
+    padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: .15s; border: 1px solid var(--card-border); background: transparent; color: var(--text);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .cv-btn svg { width: 16px; height: 16px; }
+  .cv-btn:hover { background: #ffffff0a; }
+  .cv-btn.primary { background: linear-gradient(135deg, var(--purple), #ff6bb5); border: none; color: #fff; }
+  .cv-btn.primary:hover { opacity: .9; }
+  /* 中央画布区 */
+  .cv-center { flex: 1; display: flex; flex-direction: column; background: #12121f; overflow: hidden; }
+  .cv-stage-wrap { flex: 1; position: relative; overflow: hidden; }
+  .cv-stage-wrap::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image:
+      linear-gradient(45deg, #1a1a2e 25%, transparent 25%),
+      linear-gradient(-45deg, #1a1a2e 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #1a1a2e 75%),
+      linear-gradient(-45deg, transparent 75%, #1a1a2e 75%);
+    background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    background-color: #0f0f1e; opacity: .4;
+  }
+  /* 缩放控制 */
+  .cv-zoom {
+    position: absolute; bottom: 20px; left: 20px; z-index: 10;
+    display: flex; align-items: center; gap: 4px;
+    background: #1a1a2ecc; backdrop-filter: blur(10px);
+    border: 1px solid var(--card-border); border-radius: 10px; padding: 4px;
+  }
+  .cv-zoom button {
+    width: 32px; height: 32px; border-radius: 6px; border: none; background: transparent;
+    color: var(--text-dim); cursor: pointer; font-size: 16px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cv-zoom button:hover { background: #ffffff10; color: var(--text); }
+  .cv-zoom span { font-size: 12px; color: var(--text-faint); min-width: 48px; text-align: center; }
+  /* 拖拽上传提示 */
+  .cv-drop-hint {
+    position: absolute; inset: 0; z-index: 20;
+    display: none; align-items: center; justify-content: center;
+    background: #7b5cff15; border: 2px dashed var(--purple); border-radius: 16px;
+    color: var(--purple); font-size: 18px; font-weight: 600; pointer-events: none;
+  }
+  .cv-drop-hint.show { display: flex; }
+  /* 右侧面板 */
+  .cv-right {
+    width: 260px; background: #1a1a2e; border-left: 1px solid var(--card-border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .cv-panel-tabs {
+    display: flex; border-bottom: 1px solid var(--card-border);
+  }
+  .cv-panel-tab {
+    flex: 1; padding: 12px; text-align: center; font-size: 13px;
+    color: var(--text-faint); cursor: pointer; border-bottom: 2px solid transparent; transition: .15s;
+  }
+  .cv-panel-tab:hover { color: var(--text-dim); }
+  .cv-panel-tab.on { color: var(--text); border-bottom-color: var(--purple); }
+  .cv-panel-body { flex: 1; overflow-y: auto; padding: 12px; }
+  .cv-panel-body > div { display: none; }
+  .cv-panel-body > div.on { display: block; }
+  /* 属性面板 */
+  .cv-prop-group { margin-bottom: 16px; }
+  .cv-prop-label { font-size: 12px; color: var(--text-faint); margin-bottom: 8px; }
+  .cv-prop-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .cv-prop-row label { font-size: 12px; color: var(--text-faint); width: 50px; flex-shrink: 0; }
+  .cv-prop-row input, .cv-prop-row select {
+    flex: 1; background: #ffffff08; border: 1px solid var(--card-border); border-radius: 6px;
+    color: var(--text); padding: 6px 8px; font-size: 13px; outline: none;
+  }
+  .cv-prop-row input[type=color] { width: 32px; height: 32px; padding: 2px; border-radius: 6px; cursor: pointer; }
+  .cv-prop-row input[type=range] { padding: 0; }
+  /* 图层列表 */
+  .cv-layer-item {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text-dim);
+    transition: .15s; margin-bottom: 2px;
+  }
+  .cv-layer-item:hover { background: #ffffff08; color: var(--text); }
+  .cv-layer-item.on { background: #7b5cff20; color: var(--text); }
+  .cv-layer-item .cv-layer-thumb {
+    width: 36px; height: 36px; border-radius: 6px; background: #2a2a4a; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cv-layer-item .cv-layer-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .cv-layer-item .cv-layer-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cv-layer-item .cv-layer-eye {
+    width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint); cursor: pointer;
+  }
+  .cv-layer-item .cv-layer-eye:hover { background: #ffffff10; color: var(--text); }
+  .cv-layer-item .cv-layer-eye.off { opacity: .4; }
+  /* 空图层提示 */
+  .cv-empty { text-align: center; color: var(--text-faint); font-size: 13px; padding: 40px 20px; }
+  /* Konva transformer 样式覆盖 */
+  .konvajs-content { box-shadow: 0 0 0 1px #ffffff10; border-radius: 4px; }
 </style>
+<!-- Konva.js -->
+<script src="https://unpkg.com/konva@9.3.13/konva.min.js"></script>
 </head>
 <body data-page-node-id="dLXyRohEDHgcXQ52uXgQUF">
 <div class="glow g1" data-page-node-id="rhJryFof3aOGazEIRHY9l5"></div><div class="glow g2" data-page-node-id="TlZqX4VIHVjuYictbSTM0W"></div><div class="glow g3" data-page-node-id="8dR2M7G09u5isi6WkK6o2J"></div>
@@ -619,9 +852,6 @@
   <div class="logo" data-page-node-id="huGb84svfENf42tBF82Kci"><img src="/logo.png?v=3" alt="logo"></div>
   <div class="nav-item active" data-nav="首页" data-page-node-id="xhuHcSfbw6oP7wBIHh3aYB">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="YMjH102fa7GB0rGmuI6vTi"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" data-page-node-id="wcYUcCDEoKKj6qpXwl94mF"/></svg>首页
-  </div>
-  <div class="nav-item" data-nav="创意" data-page-node-id="HiADmiuMv2RhLsEGp4yFue">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="2zsXyJOAQ0OiXVp0AMCbUR"><path d="M12 2l2.4 6.9L21 11l-6.6 2.1L12 20l-2.4-6.9L3 11l6.6-2.1z" data-page-node-id="kC5rc554PVm0YGpKnirI1e"/></svg>创意
   </div>
   <div class="nav-item" data-nav="创作" data-page-node-id="etuJa4YErB1LNfmG55NT18">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="5QYTcTGZ41DW70Zg7ztOfw"><rect x="3" y="5" width="18" height="14" rx="3" data-page-node-id="pWOaC8S0hUol8wd2rVbLgQ"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none" data-page-node-id="cRy3yUSwvT2HJJkDisDegz"/></svg>创作
@@ -841,7 +1071,201 @@
       <!-- 内容由 JS 动态渲染 -->
     </div>
   </div>
+
+  <!-- 创作页面（点击侧边栏"创作"显示） -->
+  <div class="create-page hide" id="createPage">
+    <div class="cp-title">剧集创作</div>
+    <div class="cp-sub">短剧 Agent，一键直出整部剧</div>
+    <div class="cp-upload" id="cpUpload">
+      <input type="file" id="cpFileInput" accept=".txt,.pdf,.doc,.docx" multiple style="display:none">
+      <div class="cp-files">
+        <div class="cp-file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 3v18"/></svg>
+          <span class="label">DOC</span>
+        </div>
+        <div class="cp-file center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 3v18"/></svg>
+          <span class="label">TXT</span>
+        </div>
+        <div class="cp-file">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 3v18"/></svg>
+          <span class="label">DOC</span>
+        </div>
+      </div>
+      <div class="cp-hint">拖拽剧本到这里，或选择上传方式</div>
+      <div class="cp-subhint">支持 txt / pdf / doc / docx 格式，剧本字数不超过 30 万字</div>
+      <div class="cp-btns">
+        <button class="cp-btn primary" id="cpUploadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          上传剧本
+        </button>
+        <button class="cp-btn ghost" id="cpPasteBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/></svg>
+          粘贴文本
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 资产页面（点击侧边栏"资产"显示） -->
+  <div class="assets-page hide" id="assetsPage">
+    <div class="as-tabs">
+      <div class="as-tab on" data-as="created">创作资产</div>
+      <div class="as-tab" data-as="subject">主体资产</div>
+      <div class="as-tab" data-as="published">已发布</div>
+    </div>
+    <div class="as-sub-row">
+      <div class="as-sub-tabs">
+        <div class="as-sub-tab on" data-sub="image">图片</div>
+        <div class="as-sub-tab" data-sub="video">视频</div>
+        <div class="as-sub-tab" data-sub="short">短片</div>
+      </div>
+      <button class="as-batch-btn" id="asBatchBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        批量操作
+      </button>
+    </div>
+    <div class="as-empty">
+      <div class="as-empty-ico">
+        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cloudG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#7b5cff"/>
+              <stop offset="100%" stop-color="#ff6bb5"/>
+            </linearGradient>
+            <linearGradient id="boxG" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4a3d80"/>
+              <stop offset="100%" stop-color="#2a2050"/>
+            </linearGradient>
+          </defs>
+          <!-- 大盒子 -->
+          <rect x="50" y="70" width="100" height="70" rx="10" fill="url(#boxG)" stroke="url(#cloudG)" stroke-width="1.5"/>
+          <rect x="68" y="88" width="40" height="28" rx="4" fill="#1a1530"/>
+          <circle cx="76" cy="102" r="3" fill="#7b5cff"/>
+          <rect x="82" y="101" width="20" height="3" rx="1.5" fill="#3a3060"/>
+          <rect x="82" y="108" width="12" height="3" rx="1.5" fill="#3a3060"/>
+          <!-- 小盒子 -->
+          <rect x="120" y="55" width="55" height="40" rx="8" fill="url(#boxG)" stroke="url(#cloudG)" stroke-width="1.2"/>
+          <rect x="128" y="63" width="22" height="16" rx="3" fill="#1a1530"/>
+          <circle cx="133" cy="71" r="2" fill="#ff6bb5"/>
+          <rect x="136" y="70" width="12" height="2" rx="1" fill="#3a3060"/>
+          <!-- 云朵 -->
+          <path d="M45 45 Q45 32 58 32 Q62 22 75 25 Q82 15 95 20 Q105 15 110 28 Q122 30 122 42 Q122 52 110 52 L55 52 Q45 52 45 45Z"
+                fill="url(#cloudG)" opacity=".85"/>
+          <!-- 点状装饰 -->
+          <circle cx="165" cy="25" r="2" fill="#7b5cff" opacity=".6"/>
+          <circle cx="180" cy="45" r="1.5" fill="#ff6bb5" opacity=".5"/>
+          <circle cx="30" cy="70" r="1.5" fill="#7b5cff" opacity=".5"/>
+          <circle cx="20" cy="30" r="1" fill="#ff6bb5" opacity=".4"/>
+        </svg>
+      </div>
+      <div class="as-empty-text">你的作品将展示在这里</div>
+    </div>
+  </div>
+
+  <!-- 画布页面（点击侧边栏"画布"显示） -->
+  <div class="canvas-page" id="canvasPage">
+    <!-- 左侧工具栏 -->
+    <div class="cv-toolbar">
+      <div class="cv-tool on" data-tool="select" title="选择 (V)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+      </div>
+      <div class="cv-tool" data-tool="hand" title="平移 (H)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 00-4 0v5"/><path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/><path d="M18 8a2 2 0 114 0v6a8 8 0 01-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 012.83-2.82L7 15"/></svg>
+      </div>
+      <div class="cv-sep"></div>
+      <div class="cv-tool" data-tool="text" title="文字 (T)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+      </div>
+      <div class="cv-tool" data-tool="rect" title="矩形">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      </div>
+      <div class="cv-tool" data-tool="circle" title="圆形">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+      </div>
+      <div class="cv-sep"></div>
+      <div class="cv-tool" data-tool="upload" title="上传图片">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+      </div>
+      <input type="file" id="cvFileInput" accept="image/*" multiple style="display:none">
+    </div>
+    <!-- 中央区 -->
+    <div class="cv-center">
+      <div class="cv-topbar">
+        <div class="cv-size-group">
+          <label>预设</label>
+          <select id="cvPreset">
+            <option value="1080x1920">竖屏 1080×1920</option>
+            <option value="1920x1080">横屏 1920×1080</option>
+            <option value="1080x1080">方形 1080×1080</option>
+            <option value="1200x628">公众号 1200×628</option>
+            <option value="800x800">小方形 800×800</option>
+            <option value="custom">自定义</option>
+          </select>
+          <input type="number" id="cvW" value="1080" min="100" max="4096">
+          <span style="color:var(--text-faint)">×</span>
+          <input type="number" id="cvH" value="1920" min="100" max="4096">
+          <button class="cv-btn" id="cvResize">应用</button>
+        </div>
+        <div class="cv-size-group">
+          <label>背景</label>
+          <input type="color" id="cvBgColor" value="#ffffff">
+        </div>
+        <div class="cv-spacer"></div>
+        <button class="cv-btn" id="cvDelete" title="删除选中 (Del)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 01-2 2H9a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+          删除
+        </button>
+        <button class="cv-btn" id="cvExport">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          导出 PNG
+        </button>
+      </div>
+      <div class="cv-stage-wrap" id="cvStageWrap">
+        <div id="cvDropHint" class="cv-drop-hint">拖入图片到画布</div>
+        <div class="cv-zoom">
+          <button id="cvZoomOut">−</button>
+          <span id="cvZoomLabel">100%</span>
+          <button id="cvZoomIn">+</button>
+          <button id="cvZoomReset" title="重置">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- 右侧面板 -->
+    <div class="cv-right">
+      <div class="cv-panel-tabs">
+        <div class="cv-panel-tab on" data-tab="props">属性</div>
+        <div class="cv-panel-tab" data-tab="layers">图层</div>
+      </div>
+      <div class="cv-panel-body">
+        <!-- 属性 -->
+        <div id="cvProps" class="on">
+          <div id="cvNoSel" class="cv-empty">选择一个元素查看属性</div>
+          <div id="cvPropContent" style="display:none"></div>
+        </div>
+        <!-- 图层 -->
+        <div id="cvLayers">
+          <div id="cvLayerList"></div>
+          <div id="cvEmptyLayers" class="cv-empty">暂无图层，上传图片或添加文字开始创作</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
+
+<!-- 粘贴文本弹窗 -->
+<div class="cp-paste-mask" id="cpPasteMask">
+  <div class="cp-paste-modal">
+    <h3>粘贴剧本内容</h3>
+    <textarea id="cpPasteText" placeholder="将剧本内容粘贴到这里…"></textarea>
+    <div class="cp-paste-foot">
+      <button class="cp-btn ghost" id="cpPasteCancel">取消</button>
+      <button class="cp-btn primary" id="cpPasteConfirm">开始创作</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast" data-page-node-id="Tcv1IFZqLSHTiC0XXHgCES"></div>
 
@@ -1407,10 +1831,15 @@ document.querySelectorAll(".nav-item").forEach(n => {
   n.onclick = () => {
     document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
     n.classList.add("active");
-    if (n.dataset.nav === "设置") { openSettings(); return; }
-    // 其他导航项：如果设置页开着则先关闭
-    if (!settingsPage.classList.contains("hide")) closeSettings();
-    if (n.dataset.nav !== "首页") toast(`「${n.dataset.nav}」模块开发中～`);
+    if (n.dataset.nav === "设置") { closeCreatePage(); closeAssetsPage(); closeCanvasPage(); openSettings(); return; }
+    if (n.dataset.nav === "创作") { closeSettings(); closeAssetsPage(); closeCanvasPage(); openCreatePage(); return; }
+    if (n.dataset.nav === "资产") { closeSettings(); closeCreatePage(); closeCanvasPage(); openAssetsPage(); return; }
+    if (n.dataset.nav === "画布") { closeSettings(); closeCreatePage(); closeAssetsPage(); openCanvasPage(); return; }
+    // 首页：关闭所有子页面，恢复首页内容
+    closeSettings();
+    closeCreatePage();
+    closeAssetsPage();
+    closeCanvasPage();
   };
 });
 document.querySelectorAll(".tool-btn").forEach(b => {
@@ -1671,6 +2100,614 @@ function closeSettings() {
   gallerySection && gallerySection.classList.remove("hide");
 }
 
+/* ============================================================
+ * 创作页面：剧集创作（上传剧本 / 粘贴文本）
+ * ============================================================ */
+const createPage      = $("#createPage");
+const cpUpload        = $("#cpUpload");
+const cpFileInput     = $("#cpFileInput");
+const cpUploadBtn     = $("#cpUploadBtn");
+const cpPasteBtn      = $("#cpPasteBtn");
+const cpPasteMask     = $("#cpPasteMask");
+const cpPasteText     = $("#cpPasteText");
+const cpPasteCancel   = $("#cpPasteCancel");
+const cpPasteConfirm  = $("#cpPasteConfirm");
+
+function openCreatePage() {
+  heroSection && heroSection.classList.add("hide");
+  creatorSection && creatorSection.classList.add("hide");
+  skillsSection && skillsSection.classList.add("hide");
+  myworksSection && myworksSection.classList.add("hide");
+  featuresSection && featuresSection.classList.add("hide");
+  gallerySection && gallerySection.classList.add("hide");
+  createPage.classList.remove("hide");
+}
+function closeCreatePage() {
+  createPage.classList.add("hide");
+  cpPasteMask.classList.remove("show");
+}
+
+/* ============================================================
+ * 资产页面
+ * ============================================================ */
+const assetsPage = $("#assetsPage");
+function openAssetsPage() {
+  heroSection && heroSection.classList.add("hide");
+  creatorSection && creatorSection.classList.add("hide");
+  skillsSection && skillsSection.classList.add("hide");
+  myworksSection && myworksSection.classList.add("hide");
+  featuresSection && featuresSection.classList.add("hide");
+  gallerySection && gallerySection.classList.add("hide");
+  assetsPage.classList.remove("hide");
+}
+function closeAssetsPage() { assetsPage.classList.add("hide"); }
+
+/* 资产页面 - 顶层 Tab */
+document.querySelectorAll(".as-tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".as-tab").forEach(x => x.classList.remove("on"));
+    t.classList.add("on");
+  });
+});
+/* 资产页面 - 子 Tab */
+document.querySelectorAll(".as-sub-tab").forEach(t => {
+  t.addEventListener("click", () => {
+    document.querySelectorAll(".as-sub-tab").forEach(x => x.classList.remove("on"));
+    t.classList.add("on");
+  });
+});
+
+/* ============================================================
+ * 画布页面 - Konva.js 初始化
+ * ============================================================ */
+let cvStage, cvLayer, cvBgLayer, cvTransformer, cvImgLayer;
+let cvCanvasW = 1080, cvCanvasH = 1920;
+let cvBgColor = "#ffffff";
+let cvZoom = 1;
+let cvActiveTool = "select";
+const cvPage = document.getElementById("canvasPage");
+const cvStageWrap = document.getElementById("cvStageWrap");
+const cvZoomLabel = document.getElementById("cvZoomLabel");
+const cvDropHint = document.getElementById("cvDropHint");
+
+function openCanvasPage() {
+  heroSection && heroSection.classList.add("hide");
+  creatorSection && creatorSection.classList.add("hide");
+  skillsSection && skillsSection.classList.add("hide");
+  myworksSection && myworksSection.classList.add("hide");
+  featuresSection && featuresSection.classList.add("hide");
+  gallerySection && gallerySection.classList.add("hide");
+  cvPage.classList.add("show");
+  // 首次打开时初始化 Konva
+  if (!cvStage) initKonva();
+  else { fitStageToContainer(); }
+  // 刷新图层列表
+  renderLayers();
+}
+function closeCanvasPage() { cvPage.classList.remove("show"); }
+
+function initKonva() {
+  cvStage = new Konva.Stage({
+    container: cvStageWrap,
+    width: cvStageWrap.clientWidth,
+    height: cvStageWrap.clientHeight,
+    draggable: false,
+  });
+  // 背景层
+  cvBgLayer = new Konva.Layer();
+  const bgRect = new Konva.Rect({
+    x: 0, y: 0, width: cvCanvasW, height: cvCanvasH,
+    fill: cvBgColor, name: "__bg__",
+  });
+  cvBgLayer.add(bgRect);
+  // 主图层（图片/形状/文字）
+  cvLayer = new Konva.Layer();
+  cvStage.add(cvBgLayer);
+  cvStage.add(cvLayer);
+  // Transformer
+  cvTransformer = new Konva.Transformer({
+    rotateEnabled: true,
+    anchorSize: 8,
+    borderStroke: "#7b5cff",
+    anchorStroke: "#7b5cff",
+    anchorFill: "#fff",
+  });
+  cvLayer.add(cvTransformer);
+  cvTransformer.attachTo(cvLayer.find(".image, .text, .rect-shape, .circle-shape"));
+
+  // 居中画布
+  fitStageToContainer();
+
+  // 点击空白取消选中
+  cvStage.on("click tap", e => {
+    if (e.target === cvStage || e.target === cvBgLayer.findOne(".__bg__")) {
+      cvTransformer.nodes([]);
+      cvLayer.batchDraw();
+      renderPropsPanel(null);
+      renderLayers();
+    }
+  });
+
+  // 选中变化
+  cvStage.on("select", () => {
+    const nodes = cvTransformer.nodes();
+    if (nodes.length === 1) {
+      renderPropsPanel(nodes[0]);
+    } else {
+      renderPropsPanel(null);
+    }
+    renderLayers();
+  });
+
+  // 元素位置/尺寸变化时刷新图层
+  cvLayer.on("dragend transformend", e => {
+    renderPropsPanel(e.target);
+    renderLayers();
+  });
+
+  // 窗口 resize
+  window.addEventListener("resize", () => {
+    if (!cvPage.classList.contains("show")) return;
+    cvStage.width(cvStageWrap.clientWidth);
+    cvStage.height(cvStageWrap.clientHeight);
+    fitStageToContainer();
+  });
+
+  // 键盘快捷键
+  document.addEventListener("keydown", e => {
+    if (!cvPage.classList.contains("show")) return;
+    if (e.key === "Delete" || e.key === "Backspace") {
+      if (cvTransformer.nodes().length) {
+        cvTransformer.nodes().forEach(n => n.destroy());
+        cvTransformer.nodes([]);
+        cvLayer.batchDraw();
+        renderLayers();
+        renderPropsPanel(null);
+      }
+    } else if (e.key === "v" || e.key === "V") setTool("select");
+    else if (e.key === "h" || e.key === "H") setTool("hand");
+    else if (e.key === "t" || e.key === "T") setTool("text");
+    else if (e.key === "Escape") { cvTransformer.nodes([]); cvLayer.batchDraw(); }
+  });
+
+  // 拖拽上传
+  ["dragenter", "dragover"].forEach(evt => {
+    cvStageWrap.addEventListener(evt, e => { e.preventDefault(); cvDropHint.classList.add("show"); });
+  });
+  ["dragleave", "drop"].forEach(evt => {
+    cvStageWrap.addEventListener(evt, e => { e.preventDefault(); cvDropHint.classList.remove("show"); });
+  });
+  cvStageWrap.addEventListener("drop", e => {
+    const files = Array.from(e.dataTransfer?.files || []).filter(f => f.type.startsWith("image/"));
+    files.forEach(addImageFromFile);
+  });
+
+  // 画布内部拖拽
+  cvStage.on("mouseenter", () => {
+    if (cvActiveTool === "hand") cvStage.container().style.cursor = "grab";
+  });
+
+  bindCanvasControls();
+}
+
+function fitStageToContainer() {
+  if (!cvStage) return;
+  const cw = cvStage.width();
+  const ch = cvStage.height();
+  const scale = Math.min(cw / cvCanvasW, ch / cvCanvasH) * 0.7;
+  cvZoom = scale;
+  cvStage.scale({ x: scale, y: scale });
+  cvStage.position({
+    x: (cw - cvCanvasW * scale) / 2,
+    y: (ch - cvCanvasH * scale) / 2,
+  });
+  cvZoomLabel.textContent = Math.round(scale * 100) + "%";
+  cvLayer.batchDraw();
+}
+
+function setTool(tool) {
+  cvActiveTool = tool;
+  document.querySelectorAll(".cv-tool").forEach(t => t.classList.toggle("on", t.dataset.tool === tool));
+  if (tool === "hand") {
+    cvStage.draggable(true);
+    cvStage.container().style.cursor = "grab";
+    cvTransformer.nodes([]);
+    cvLayer.batchDraw();
+  } else {
+    cvStage.draggable(false);
+    cvStage.container().style.cursor = tool === "select" ? "default" : "crosshair";
+  }
+}
+
+function addImageFromFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      // 缩放适配画布
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const maxDim = Math.max(cvCanvasW, cvCanvasH) * 0.8;
+      if (w > maxDim || h > maxDim) {
+        const s = maxDim / Math.max(w, h);
+        w *= s; h *= s;
+      }
+      const node = new Konva.Image({
+        image: img, width: w, height: h,
+        x: (cvCanvasW - w) / 2,
+        y: (cvCanvasH - h) / 2,
+        draggable: true,
+        name: "image",
+      });
+      node._fileName = file.name;
+      cvLayer.add(node);
+      selectNode(node);
+      cvLayer.batchDraw();
+      renderLayers();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function addTextNode() {
+  const node = new Konva.Text({
+    x: cvCanvasW / 2 - 100,
+    y: cvCanvasH / 2,
+    text: "双击编辑文字",
+    fontSize: 36,
+    fontStyle: "bold",
+    fill: "#ffffff",
+    width: 200,
+    align: "center",
+    draggable: true,
+    name: "text",
+  });
+  cvLayer.add(node);
+  selectNode(node);
+  cvLayer.batchDraw();
+  renderLayers();
+
+  // 双击编辑
+  node.on("dblclick", () => {
+    const textNode = node;
+    const stage = cvStage;
+    const layer = cvLayer;
+    const text = textNode.text();
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "absolute";
+    textarea.style.top = stage.container().offsetTop + textNode.getClientRect({ relativeTo: stage }).top + "px";
+    textarea.style.left = stage.container().offsetLeft + textNode.getClientRect({ relativeTo: stage }).left + "px";
+    textarea.style.width = textNode.getClientRect().width + "px";
+    textarea.style.height = textNode.getClientRect().height + "px";
+    textarea.style.fontSize = textNode.fontSize() + "px";
+    textarea.style.fontWeight = textNode.fontStyle();
+    textarea.style.color = textNode.fill();
+    textarea.style.background = "transparent";
+    textarea.style.border = "1px dashed #7b5cff";
+    textarea.style.colorScheme = "dark";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    const removeTextarea = () => {
+      textarea.remove();
+      textNode.text(textarea.value || "文字");
+      layer.batchDraw();
+      renderLayers();
+      renderPropsPanel(textNode);
+    };
+    textarea.addEventListener("blur", removeTextarea);
+    textarea.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); textarea.blur(); }
+      if (e.key === "Escape") { textarea.value = text; textarea.blur(); }
+    });
+  });
+}
+
+function addShapeNode(type) {
+  let node;
+  const cx = cvCanvasW / 2, cy = cvCanvasH / 2;
+  if (type === "rect") {
+    node = new Konva.Rect({
+      x: cx - 100, y: cy - 60, width: 200, height: 120,
+      fill: "#7b5cff", cornerRadius: 12, draggable: true, name: "rect-shape",
+    });
+  } else {
+    node = new Konva.Circle({
+      x: cx, y: cy, radius: 80,
+      fill: "#ff6bb5", draggable: true, name: "circle-shape",
+    });
+  }
+  cvLayer.add(node);
+  selectNode(node);
+  cvLayer.batchDraw();
+  renderLayers();
+}
+
+function selectNode(node) {
+  cvTransformer.nodes([node]);
+}
+
+function bindCanvasControls() {
+  // 工具栏
+  document.querySelectorAll(".cv-tool").forEach(t => {
+    t.addEventListener("click", () => {
+      const tool = t.dataset.tool;
+      if (tool === "upload") {
+        document.getElementById("cvFileInput").click();
+      } else if (tool === "text") {
+        setTool("select");
+        addTextNode();
+      } else if (tool === "rect") {
+        setTool("select");
+        addShapeNode("rect");
+      } else if (tool === "circle") {
+        setTool("select");
+        addShapeNode("circle");
+      } else {
+        setTool(tool);
+      }
+    });
+  });
+
+  // 文件选择
+  document.getElementById("cvFileInput").addEventListener("change", e => {
+    Array.from(e.target.files || []).filter(f => f.type.startsWith("image/")).forEach(addImageFromFile);
+    e.target.value = "";
+  });
+
+  // 预设尺寸
+  document.getElementById("cvPreset").addEventListener("change", e => {
+    const val = e.target.value;
+    if (val === "custom") return;
+    const [w, h] = val.split("x").map(Number);
+    cvCanvasW = w; cvCanvasH = h;
+    document.getElementById("cvW").value = w;
+    document.getElementById("cvH").value = h;
+    resizeCanvas();
+  });
+  document.getElementById("cvResize").addEventListener("click", resizeCanvas);
+  document.getElementById("cvW").addEventListener("change", e => cvCanvasW = Number(e.target.value));
+  document.getElementById("cvH").addEventListener("change", e => cvCanvasH = Number(e.target.value));
+
+  // 背景色
+  document.getElementById("cvBgColor").addEventListener("input", e => {
+    cvBgColor = e.target.value;
+    const bg = cvBgLayer.findOne(".__bg__");
+    if (bg) bg.fill(cvBgColor);
+    cvBgLayer.batchDraw();
+  });
+
+  // 缩放
+  document.getElementById("cvZoomIn").addEventListener("click", () => zoomBy(1.2));
+  document.getElementById("cvZoomOut").addEventListener("click", () => zoomBy(1 / 1.2));
+  document.getElementById("cvZoomReset").addEventListener("click", () => fitStageToContainer());
+
+  // 删除
+  document.getElementById("cvDelete").addEventListener("click", () => {
+    cvTransformer.nodes().forEach(n => n.destroy());
+    cvTransformer.nodes([]);
+    cvLayer.batchDraw();
+    renderLayers();
+    renderPropsPanel(null);
+  });
+
+  // 导出
+  document.getElementById("cvExport").addEventListener("click", exportCanvas);
+
+  // 面板 Tab
+  document.querySelectorAll(".cv-panel-tab").forEach(t => {
+    t.addEventListener("click", () => {
+      document.querySelectorAll(".cv-panel-tab").forEach(x => x.classList.remove("on"));
+      t.classList.add("on");
+      document.querySelectorAll(".cv-panel-body > div").forEach(x => x.classList.remove("on"));
+      document.getElementById(t.dataset.tab === "props" ? "cvProps" : "cvLayers").classList.add("on");
+    });
+  });
+
+  // 滚轮缩放
+  cvStageWrap.addEventListener("wheel", e => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      zoomBy(e.deltaY > 0 ? 1 / 1.1 : 1.1);
+    }
+  }, { passive: false });
+}
+
+function zoomBy(factor) {
+  if (!cvStage) return;
+  cvZoom = Math.max(0.1, Math.min(5, cvZoom * factor));
+  const pos = cvStage.position();
+  const oldScale = cvStage.scaleX();
+  const newScale = cvZoom;
+  const mousePointTo = {
+    x: cvStageWrap.clientWidth / 2,
+    y: cvStageWrap.clientHeight / 2,
+  };
+  cvStage.scale({ x: newScale, y: newScale });
+  cvStage.position({
+    x: mousePointTo.x - (mousePointTo.x - pos.x) * (newScale / oldScale),
+    y: mousePointTo.y - (mousePointTo.y - pos.y) * (newScale / oldScale),
+  });
+  cvZoomLabel.textContent = Math.round(newScale * 100) + "%";
+  cvLayer.batchDraw();
+}
+
+function resizeCanvas() {
+  cvCanvasW = Number(document.getElementById("cvW").value);
+  cvCanvasH = Number(document.getElementById("cvH").value);
+  // 更新背景
+  const bg = cvBgLayer.findOne(".__bg__");
+  if (bg) { bg.width(cvCanvasW); bg.height(cvCanvasH); }
+  // 超出画布的元素限制
+  cvLayer.find(".image, .text, .rect-shape, .circle-shape").forEach(n => {
+    const r = n.getClientRect();
+    if (r.width > cvCanvasW) n.width(cvCanvasW * 0.8);
+    if (r.height > cvCanvasH) n.height(cvCanvasH * 0.8);
+    n.position({
+      x: Math.min(n.x(), cvCanvasW - 50),
+      y: Math.min(n.y(), cvCanvasH - 50),
+    });
+  });
+  cvBgLayer.batchDraw();
+  cvLayer.batchDraw();
+  fitStageToContainer();
+  toast(`画布尺寸：${cvCanvasW} × ${cvCanvasH}`);
+}
+
+function exportCanvas() {
+  if (!cvStage) return;
+  // 创建导出 stage，只保留画布区域内容
+  const exportStage = new Konva.Stage({
+    width: cvCanvasW, height: cvCanvasH, container: document.createElement("div"),
+  });
+  const exportBg = cvBgLayer.clone();
+  const exportLayer = cvLayer.clone();
+  // 移除 transformer
+  exportLayer.find("Transformer").forEach(t => t.destroy());
+  exportStage.add(exportBg);
+  exportStage.add(exportLayer);
+
+  const dataUrl = exportStage.toDataURL({ pixelRatio: 1, mimeType: "image/png" });
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = `canvas_${cvCanvasW}x${cvCanvasH}.png`;
+  a.click();
+  toast("导出成功！");
+  // 清理
+  exportStage.destroy();
+}
+
+/* ---- 图层面板 ---- */
+function renderLayers() {
+  if (!cvLayer) return;
+  const items = cvLayer.find(".image, .text, .rect-shape, .circle-shape");
+  const list = document.getElementById("cvLayerList");
+  const empty = document.getElementById("cvEmptyLayers");
+  if (!items.length) { list.innerHTML = ""; empty.style.display = "block"; return; }
+  empty.style.display = "none";
+  // 倒序：顶层在上
+  list.innerHTML = "";
+  for (let i = items.length - 1; i >= 0; i--) {
+    const n = items[i];
+    const div = document.createElement("div");
+    div.className = "cv-layer-item";
+    if (cvTransformer.nodes().includes(n)) div.classList.add("on");
+    let thumbHtml = "", name = "";
+    if (n.name() === "image") {
+      name = n._fileName || "图片";
+      const img = n.image();
+      if (img) thumbHtml = `<img src="${img.src}">`;
+    } else if (n.name() === "text") {
+      name = "文字: " + (n.text().slice(0, 12) || "文字");
+      thumbHtml = `<span style="font-size:10px;color:#7b5cff;font-weight:700;">T</span>`;
+    } else if (n.name() === "rect-shape") {
+      name = "矩形";
+      thumbHtml = `<div style="width:20px;height:14px;border-radius:3px;background:${n.fill()};"></div>`;
+    } else if (n.name() === "circle-shape") {
+      name = "圆形";
+      thumbHtml = `<div style="width:18px;height:18px;border-radius:50%;background:${n.fill()};"></div>`;
+    }
+    div.innerHTML = `
+      <div class="cv-layer-thumb">${thumbHtml}</div>
+      <div class="cv-layer-name">${name}</div>
+      <div class="cv-layer-eye ${!n.visible() ? "off" : ""}" title="显隐">
+        ${n.visible() ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'}
+      </div>
+    `;
+    div.addEventListener("click", e => {
+      if (e.target.closest(".cv-layer-eye")) {
+        n.visible(!n.visible());
+        cvLayer.batchDraw();
+        renderLayers();
+      } else {
+        selectNode(n);
+        cvLayer.batchDraw();
+        renderLayers();
+        renderPropsPanel(n);
+      }
+    });
+    list.appendChild(div);
+  }
+}
+
+/* ---- 属性面板 ---- */
+function renderPropsPanel(node) {
+  const noSel = document.getElementById("cvNoSel");
+  const content = document.getElementById("cvPropContent");
+  if (!node) { noSel.style.display = "block"; content.style.display = "none"; return; }
+  noSel.style.display = "none"; content.style.display = "block";
+
+  const type = node.name();
+  let html = `
+    <div class="cv-prop-group">
+      <div class="cv-prop-label">位置</div>
+      <div class="cv-prop-row"><label>X</label><input type="number" id="ppX" value="${Math.round(node.x())}"></div>
+      <div class="cv-prop-row"><label>Y</label><input type="number" id="ppY" value="${Math.round(node.y())}"></div>
+    </div>
+    <div class="cv-prop-group">
+      <div class="cv-prop-label">尺寸</div>
+      <div class="cv-prop-row"><label>W</label><input type="number" id="ppW" value="${Math.round(node.width() * (node.scaleX() || 1))}"></div>
+      <div class="cv-prop-row"><label>H</label><input type="number" id="ppH" value="${Math.round(node.height() * (node.scaleY() || 1))}"></div>
+    </div>
+    <div class="cv-prop-group">
+      <div class="cv-prop-label">旋转</div>
+      <div class="cv-prop-row"><input type="range" id="ppRot" min="0" max="360" value="${Math.round(node.rotation())}"> <span style="font-size:12px;color:var(--text-faint)">${Math.round(node.rotation())}°</span></div>
+    </div>
+  `;
+  if (type === "text") {
+    html += `
+      <div class="cv-prop-group">
+        <div class="cv-prop-label">文字内容</div>
+        <div class="cv-prop-row"><textarea id="ppText" rows="3" style="flex:1;background:#ffffff08;border:1px solid var(--card-border);border-radius:6px;color:var(--text);padding:6px 8px;font-size:13px;outline:none;resize:vertical;">${node.text()}</textarea></div>
+      </div>
+      <div class="cv-prop-group">
+        <div class="cv-prop-label">文字样式</div>
+        <div class="cv-prop-row"><label>字号</label><input type="number" id="ppFS" value="${node.fontSize()}"></div>
+        <div class="cv-prop-row"><label>颜色</label><input type="color" id="ppColor" value="${node.fill()}"></div>
+        <div class="cv-prop-row"><label>粗体</label><input type="checkbox" id="ppBold" ${node.fontStyle() === "bold" ? "checked" : ""} style="width:16px;height:16px;"></div>
+      </div>
+    `;
+  } else if (type === "rect-shape" || type === "circle-shape") {
+    html += `
+      <div class="cv-prop-group">
+        <div class="cv-prop-label">填充颜色</div>
+        <div class="cv-prop-row"><label>颜色</label><input type="color" id="ppColor" value="${node.fill()}"></div>
+      </div>
+    `;
+  }
+  content.innerHTML = html;
+
+  // 绑定事件
+  const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener("input", fn); };
+  bind("ppX", e => { node.x(Number(e.target.value)); cvLayer.batchDraw(); });
+  bind("ppY", e => { node.y(Number(e.target.value)); cvLayer.batchDraw(); });
+  bind("ppW", e => {
+    const v = Number(e.target.value);
+    if (type === "image") node.scaleX(v / node.width());
+    else node.width(v);
+    cvLayer.batchDraw();
+  });
+  bind("ppH", e => {
+    const v = Number(e.target.value);
+    if (type === "image") node.scaleY(v / node.height());
+    else node.height(v);
+    cvLayer.batchDraw();
+  });
+  bind("ppRot", e => { node.rotation(Number(e.target.value)); cvLayer.batchDraw(); });
+  if (type === "text") {
+    bind("ppText", e => { node.text(e.target.value); cvLayer.batchDraw(); });
+    bind("ppFS", e => { node.fontSize(Number(e.target.value)); cvLayer.batchDraw(); });
+    bind("ppColor", e => { node.fill(e.target.value); cvLayer.batchDraw(); });
+    document.getElementById("ppBold")?.addEventListener("change", e => {
+      node.fontStyle(e.target.checked ? "bold" : "normal"); cvLayer.batchDraw();
+    });
+  } else {
+    bind("ppColor", e => { node.fill(e.target.value); cvLayer.batchDraw(); });
+  }
+}
+
 /* 左侧子导航切换 */
 document.querySelectorAll(".sp-item").forEach(item => {
   item.addEventListener("click", () => {
@@ -1807,6 +2844,41 @@ async function saveProfile() {
     btn.disabled = false;
   }
 }
+
+/* 创作页面 - 上传/粘贴交互 */
+cpUploadBtn.addEventListener("click", () => cpFileInput.click());
+cpFileInput.addEventListener("change", e => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  toast(`已选择 ${files.length} 个文件，开始解析剧本…`);
+  // TODO: 后续接入后端解析流程
+});
+cpPasteBtn.addEventListener("click", () => { cpPasteMask.classList.add("show"); cpPasteText.focus(); });
+cpPasteCancel.addEventListener("click", () => cpPasteMask.classList.remove("show"));
+cpPasteMask.addEventListener("click", e => { if (e.target === cpPasteMask) cpPasteMask.classList.remove("show"); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") cpPasteMask.classList.remove("show"); });
+cpPasteConfirm.addEventListener("click", () => {
+  const text = cpPasteText.value.trim();
+  if (!text) { toast("请先粘贴剧本内容"); return; }
+  toast(`已粘贴 ${text.length} 字，开始创作…`);
+  cpPasteMask.classList.remove("show");
+  cpPasteText.value = "";
+  // TODO: 后续接入后端生成流程
+});
+
+/* 创作页面 - 拖拽上传 */
+["dragenter", "dragover"].forEach(evt => {
+  cpUpload.addEventListener(evt, e => { e.preventDefault(); cpUpload.classList.add("drag"); });
+});
+["dragleave", "drop"].forEach(evt => {
+  cpUpload.addEventListener(evt, e => { e.preventDefault(); cpUpload.classList.remove("drag"); });
+});
+cpUpload.addEventListener("drop", e => {
+  const files = Array.from(e.dataTransfer?.files || []);
+  if (!files.length) return;
+  toast(`已拖入 ${files.length} 个文件，开始解析剧本…`);
+  // TODO: 后续接入后端解析流程
+});
 
 /* 启动：若本地已有登录态则恢复 */
 fetchMe();
