@@ -770,6 +770,80 @@
   .as-empty-ico svg { width: 100%; height: 100%; filter: drop-shadow(0 8px 30px #7b5cff33); }
   .as-empty-text { font-size: 14px; letter-spacing: 1px; }
 
+  /* ===== 作品页面 ===== */
+  .mw-page { padding: 24px 0; max-width: 1280px; margin: 0 auto; }
+  .mw-page.hide { display: none; }
+  .mw-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
+  .mw-head h2 {
+    font-size: 28px; font-weight: 800;
+    background: linear-gradient(100deg, var(--purple), var(--pink));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .mw-head .sub { font-size: 13px; color: var(--text-faint); }
+  .mw-desc { font-size: 13.5px; color: var(--text-faint); margin-bottom: 24px; }
+  .mw-tabs { display: flex; gap: 4px; background: #ffffff08; padding: 4px; border-radius: 999px; margin-bottom: 28px; width: fit-content; }
+  .mw-tab {
+    padding: 8px 22px; border-radius: 999px; font-size: 14px; color: var(--text-dim);
+    cursor: pointer; transition: .2s; font-weight: 500;
+  }
+  .mw-tab.on { background: #fff; color: #0f0f1e; font-weight: 600; }
+  .mw-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px; align-items: start;
+  }
+  .mw-card {
+    border-radius: var(--radius); overflow: hidden; position: relative;
+    border: 1px solid var(--card-border); background: var(--bg-soft);
+    animation: pop .35s ease; display: flex; flex-direction: column;
+  }
+  .mw-card .stage {
+    position: relative; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; background: #0a0a12; aspect-ratio: 16/9;
+  }
+  .mw-card .stage img, .mw-card .stage video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .mw-card .stage video { cursor: pointer; }
+  .mw-card .stage .ph {
+    width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+    color: var(--text-faint); font-size: 12.5px; gap: 10px; flex-direction: column;
+    background: linear-gradient(160deg, #1a1a2e, #12121f);
+  }
+  .mw-card .stage .ph svg { width: 36px; height: 36px; opacity: .5; }
+  .mw-card .stage .type-tag {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+    background: #00000080; backdrop-filter: blur(8px); color: #fff;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .mw-card .info { padding: 12px 14px 14px; }
+  .mw-card .info h5 {
+    font-size: 13.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .mw-card .info .meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; font-size: 11.5px; color: var(--text-faint); flex-wrap: wrap; gap: 8px;
+  }
+  .mw-card .info .st { color: var(--purple-light); }
+  .mw-card .info .st.fail { color: #f87171; }
+  .mw-card .info .st.done { color: #4ade80; }
+  .mw-card .info .dl-link { color: var(--text-dim); text-decoration: none; font-size: 11.5px; }
+  .mw-card .info .dl-link:hover { color: var(--purple-light); }
+  .mw-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 100px 40px; color: var(--text-faint); gap: 18px;
+  }
+  .mw-empty-ico { width: 140px; height: 140px; opacity: .55; }
+  .mw-empty-ico svg { width: 100%; height: 100%; filter: drop-shadow(0 8px 30px #7b5cff33); }
+  .mw-empty-text { font-size: 14px; letter-spacing: 1px; }
+  .mw-empty-hint { font-size: 12.5px; color: var(--text-faint); }
+  .mw-empty-btn {
+    margin-top: 8px; padding: 10px 24px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: #fff; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: .2s;
+  }
+  .mw-empty-btn:hover { opacity: .92; transform: translateY(-1px); }
+
   /* ===== 画布页面 ===== */
   .canvas-page { display: none; height: calc(100vh - 40px); overflow: hidden; }
   .canvas-page.show { display: flex; }
@@ -907,6 +981,9 @@
   <div class="logo" data-page-node-id="huGb84svfENf42tBF82Kci"><img src="/logo.png?v=3" alt="logo"></div>
   <div class="nav-item active" data-nav="首页" data-page-node-id="xhuHcSfbw6oP7wBIHh3aYB">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="YMjH102fa7GB0rGmuI6vTi"><path d="M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5" data-page-node-id="wcYUcCDEoKKj6qpXwl94mF"/></svg>首页
+  </div>
+  <div class="nav-item" data-nav="作品" data-page-node-id="woRksNav9X7Vt2yLpQm4sHb">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="woRksSvg6KqLr9tXp2Ym1Vc"><path d="M4 4h7v7H4z" data-page-node-id="woRksRect1"/><path d="M13 4h7v7h-7z" data-page-node-id="woRksRect2"/><path d="M4 13h7v7H4z" data-page-node-id="woRksRect3"/><path d="M13 13h7v7h-7z" data-page-node-id="woRksRect4"/></svg>作品
   </div>
   <div class="nav-item" data-nav="创作" data-page-node-id="etuJa4YErB1LNfmG55NT18">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" data-page-node-id="5QYTcTGZ41DW70Zg7ztOfw"><rect x="3" y="5" width="18" height="14" rx="3" data-page-node-id="pWOaC8S0hUol8wd2rVbLgQ"/><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none" data-page-node-id="cRy3yUSwvT2HJJkDisDegz"/></svg>创作
@@ -1219,6 +1296,33 @@
         </svg>
       </div>
       <div class="as-empty-text">你的作品将展示在这里</div>
+    </div>
+  </div>
+
+  <!-- 作品页面（点击侧边栏"作品"显示） -->
+  <div class="mw-page hide" id="mwPage">
+    <div class="mw-head">
+      <h2>🎨 我的作品</h2>
+      <span class="sub" id="mwCount"></span>
+    </div>
+    <div class="mw-desc">首页生成的所有图片和视频会自动同步到这里</div>
+    <div class="mw-tabs" id="mwTabs">
+      <div class="mw-tab on" data-mw="全部">全部</div>
+      <div class="mw-tab" data-mw="image">图片</div>
+      <div class="mw-tab" data-mw="video">视频</div>
+    </div>
+    <div class="mw-grid" id="mwGrid"></div>
+    <div class="mw-empty hide" id="mwEmpty">
+      <div class="mw-empty-ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3"/>
+          <path d="M3 15l5-5 4 4 3-3 6 6"/>
+          <circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div class="mw-empty-text">还没有作品</div>
+      <div class="mw-empty-hint">在首页进行文生图 / 图生图 / 文生视频 / 图生视频后，作品会自动同步到这里</div>
+      <button class="mw-empty-btn" id="mwGoHome">去首页创作</button>
     </div>
   </div>
 
@@ -1635,6 +1739,9 @@ function loadWorks() {
 }
 function saveWorks() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(works.slice(0, 60))); } catch (e) {}
+  // 若用户当前停留在"作品"页面，实时同步最新状态
+  const mwVisible = $("#mwPage") && !$("#mwPage").classList.contains("hide");
+  if (mwVisible && typeof renderMyWorksPage === "function") renderMyWorksPage();
 }
 function findWork(id) { return works.find(w => w.id === id); }
 
@@ -1847,6 +1954,8 @@ $("#clearWorks").addEventListener("click", () => {
   $("#workGrid").innerHTML = "";
   $("#myworks").classList.add("hide");
   updateWorksCount();
+  // 同步清空"作品"页面
+  if (!$("#mwPage").classList.contains("hide")) renderMyWorksPage();
   toast("已清空创作记录（重新生成不受影响）");
 });
 
@@ -1988,15 +2097,17 @@ document.querySelectorAll(".nav-item").forEach(n => {
   n.onclick = () => {
     document.querySelectorAll(".nav-item").forEach(x => x.classList.remove("active"));
     n.classList.add("active");
-    if (n.dataset.nav === "设置") { closeCreatePage(); closeAssetsPage(); closeCanvasPage(); openSettings(); return; }
-    if (n.dataset.nav === "创作") { closeSettings(); closeAssetsPage(); closeCanvasPage(); openCreatePage(); return; }
-    if (n.dataset.nav === "资产") { closeSettings(); closeCreatePage(); closeCanvasPage(); openAssetsPage(); return; }
-    if (n.dataset.nav === "画布") { closeSettings(); closeCreatePage(); closeAssetsPage(); openCanvasPage(); return; }
+    if (n.dataset.nav === "设置") { closeCreatePage(); closeAssetsPage(); closeCanvasPage(); closeMwPage(); openSettings(); return; }
+    if (n.dataset.nav === "作品") { closeSettings(); closeCreatePage(); closeAssetsPage(); closeCanvasPage(); openMwPage(); return; }
+    if (n.dataset.nav === "创作") { closeSettings(); closeAssetsPage(); closeCanvasPage(); closeMwPage(); openCreatePage(); return; }
+    if (n.dataset.nav === "资产") { closeSettings(); closeCreatePage(); closeCanvasPage(); closeMwPage(); openAssetsPage(); return; }
+    if (n.dataset.nav === "画布") { closeSettings(); closeCreatePage(); closeAssetsPage(); closeMwPage(); openCanvasPage(); return; }
     // 首页：关闭所有子页面，恢复首页内容
     closeSettings();
     closeCreatePage();
     closeAssetsPage();
     closeCanvasPage();
+    closeMwPage();
   };
 });
 document.querySelectorAll(".tool-btn").forEach(b => {
@@ -2342,6 +2453,104 @@ function openCanvasPage() {
   renderLayers();
 }
 function closeCanvasPage() { cvPage.classList.remove("show"); }
+
+/* ============================================================
+ * 作品页面：展示首页生成的所有图片 / 视频
+ * 数据源与首页"我的创作"共用 localStorage 的 works 数组，
+ * 因此在首页进行创作后，作品会自动同步到本页面。
+ * ============================================================ */
+const mwPage  = $("#mwPage");
+const mwGrid  = $("#mwGrid");
+const mwEmpty = $("#mwEmpty");
+const mwCount = $("#mwCount");
+let mwFilter = "全部";   // 全部 / image / video
+
+/* 根据当前筛选条件渲染作品列表 */
+function renderMyWorksPage() {
+  const list = works.filter(w => mwFilter === "全部" || w.type === mwFilter);
+  mwGrid.innerHTML = "";
+  if (!list.length) {
+    mwGrid.classList.add("hide");
+    mwEmpty.classList.remove("hide");
+    mwCount.textContent = "";
+    return;
+  }
+  mwEmpty.classList.add("hide");
+  mwGrid.classList.remove("hide");
+  mwCount.textContent = `共 ${list.length} 个作品`;
+
+  mwGrid.innerHTML = list.map(w => {
+    const isVideo = w.type === "video";
+    const ratio = (w.ratio || "16:9").replace(":", "/");
+    const status = w.status || "pending";
+    const promptEsc = String(w.prompt || "").replace(/"/g, "&quot;");
+    const modelName = (w.model || "").split("-").slice(0, 3).join(" ");
+    const time = w.time || "";
+    let stageInner = "";
+    if (status === "done" && w.url) {
+      stageInner = isVideo
+        ? `<video src="${w.url}" muted></video>`
+        : `<img src="${w.url}" alt="">`;
+    } else if (status === "fail") {
+      stageInner = `<div class="ph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg><span>生成失败</span></div>`;
+    } else {
+      stageInner = `<div class="ph"><div class="spinner"></div><span>生成中…</span></div>`;
+    }
+    const stTxt = status === "done" ? "已完成" : (status === "fail" ? "失败" : "生成中");
+    const dlLink = status === "done" && w.url
+      ? `<a class="dl-link" href="${w.url.startsWith("data:") ? w.url : "/api/download?url=" + encodeURIComponent(w.url)}" download="" target="_blank" rel="noopener">${isVideo ? "⬇ 保存视频" : "⬇ 保存图片"}</a>`
+      : `<span></span>`;
+    return `
+      <div class="mw-card" data-id="${w.id}">
+        <div class="stage" style="aspect-ratio:${ratio}">
+          <span class="type-tag">${isVideo ? "🎬 视频" : "🖼️ 图片"}</span>
+          ${stageInner}
+        </div>
+        <div class="info">
+          <h5 title="${promptEsc}">${promptEsc || "（未填写描述）"}</h5>
+          <div class="meta">
+            <span class="st ${status === "done" ? "done" : (status === "fail" ? "fail" : "")}">${stTxt}</span>
+            <span>${modelName} · ${time}</span>
+          </div>
+          <div class="meta">${dlLink}<span></span></div>
+        </div>
+      </div>`;
+  }).join("");
+
+  // 绑定视频点击播放
+  mwGrid.querySelectorAll(".mw-card video").forEach(v => {
+    v.addEventListener("click", () => {
+      if (v.paused) { v.play(); v.controls = true; v.muted = false; }
+      else { v.pause(); }
+    });
+  });
+}
+
+function openMwPage() {
+  heroSection && heroSection.classList.add("hide");
+  creatorSection && creatorSection.classList.add("hide");
+  skillsSection && skillsSection.classList.add("hide");
+  myworksSection && myworksSection.classList.add("hide");
+  featuresSection && featuresSection.classList.add("hide");
+  gallerySection && gallerySection.classList.add("hide");
+  mwPage.classList.remove("hide");
+  renderMyWorksPage();
+}
+function closeMwPage() { mwPage.classList.add("hide"); }
+
+/* 作品页面 - 顶部筛选 Tab */
+$("#mwTabs").addEventListener("click", e => {
+  const el = e.target.closest(".mw-tab"); if (!el) return;
+  document.querySelectorAll(".mw-tab").forEach(t => t.classList.remove("on"));
+  el.classList.add("on");
+  mwFilter = el.dataset.mw;
+  renderMyWorksPage();
+});
+/* 作品页面 - 空态按钮：跳回首页创作 */
+$("#mwGoHome").addEventListener("click", () => {
+  const homeNav = document.querySelector('.nav-item[data-nav="首页"]');
+  if (homeNav) homeNav.click();
+});
 
 function initKonva() {
   cvStage = new Konva.Stage({
