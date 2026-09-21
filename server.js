@@ -15,6 +15,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const zlib = require("zlib");
 
 /* ---------- 用户系统（文件存储 + scrypt 密码哈希 + 无状态签名 token） ---------- */
 const USERS_FILE = path.join(__dirname, "users.json");
@@ -37,7 +38,26 @@ function loadUsers() {
   catch { return { users: [] }; }
 }
 function saveUsers(data) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+  // 原子写入：先写临时文件再 rename，避免写入中途崩溃导致 users.json 损坏
+  const tmp = USERS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(data, null, 2));
+  fs.renameSync(tmp, USERS_FILE);
+}
+
+/* ---------- 简易限流（内存滑动窗口，防登录/注册暴力破解） ---------- */
+const _rl = new Map(); // key: ip+route → number[]
+function rateLimit(req, route, max = 20, windowMs = 10 * 60 * 1000) {
+  const ip = req.socket.remoteAddress || "?";
+  const key = ip + "|" + route;
+  const now = Date.now();
+  const arr = (_rl.get(key) || []).filter(t => now - t < windowMs);
+  if (arr.length >= max) { _rl.set(key, arr); return false; }
+  arr.push(now); _rl.set(key, arr);
+  // 防内存膨胀：Map 过大时清理过期窗口
+  if (_rl.size > 5000) {
+    for (const [k, v] of _rl) { const f = v.filter(t => now - t < windowMs); f.length ? _rl.set(k, f) : _rl.delete(k); }
+  }
+  return true;
 }
 function hashPassword(pw, salt) {
   return crypto.scryptSync(pw, salt, 64).toString("hex");
@@ -147,42 +167,61 @@ function readBody(req) {
   });
 }
 
+/* 通用安全响应头 */
+const SEC_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "DENY",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+};
+
 function send(res, code, obj) {
   const s = JSON.stringify(obj);
   res.writeHead(code, {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    ...SEC_HEADERS,
   });
   res.end(s);
 }
 
-/* ---------- 模型参数整理 ---------- */
+/* ---------- 模型参数整理（入参白名单校验，防任意参数透传） ---------- */
 const VIDEO_DIMS = {
   "16:9": [832, 448],
   "9:16": [448, 832],
   "1:1": [576, 576],
 };
+const IMAGE_MODELS = ["agnes-image-2.1-flash", "agnes-image-2.0-flash"];
+const VIDEO_MODELS = ["agnes-video-2.5-flash", "agnes-video-v2.0"];
+const IMG_SIZES = ["1K", "2K", "3K", "4K"];
+const RATIOS = ["16:9", "9:16", "1:1", "4:3", "3:4", "3:2", "2:3", "21:9"];
+const MAX_PROMPT_LEN = 4000;
+const MAX_REF_IMAGES = 5;
 
 /* 生图请求 → Agnes /v1/images/generations */
 async function handleImage(payload) {
+  const prompt = String(payload.prompt || "").slice(0, MAX_PROMPT_LEN);
   const body = {
-    model: payload.model || "agnes-image-2.1-flash",
-    prompt: payload.prompt,
-    size: payload.size || "1K",
-    ratio: payload.ratio || "16:9",
+    model: IMAGE_MODELS.includes(payload.model) ? payload.model : "agnes-image-2.1-flash",
+    prompt,
+    size: IMG_SIZES.includes(payload.size) ? payload.size : "1K",
+    ratio: RATIOS.includes(payload.ratio) ? payload.ratio : "16:9",
     extra_body: { response_format: "url" },
   };
   if (Array.isArray(payload.images) && payload.images.length) {
-    body.extra_body.image = payload.images; // 图生图 / 多图合成（URL 或 Data URI）
+    body.extra_body.image = payload.images.slice(0, MAX_REF_IMAGES); // 图生图 / 多图合成（URL 或 Data URI）
   }
   return agnesFetch("/v1/images/generations", "POST", body);
 }
 
 /* 生视频建任务 → Agnes /v1/videos */
 async function handleVideoCreate(payload) {
+  if (!VIDEO_MODELS.includes(payload.model) && payload.model) {
+    return { status: 400, json: { error: "不支持的视频模型" } };
+  }
   const model = payload.model || "agnes-video-v2.0";
+  payload.prompt = String(payload.prompt || "").slice(0, MAX_PROMPT_LEN);
   const seconds = String(Math.min(Math.max(parseInt(payload.seconds, 10) || 5, 4), 12));
   const imageUrl = payload.image_url || "";
 
@@ -254,9 +293,55 @@ async function handleDownload(req, res, target) {
   }
 }
 
-/* ---------- Skill 主题图：AI 生成 + 本地缓存 ---------- */
+/* ---------- Skill 主题图：AI 生成 + 本地缓存 ----------
+   prompt 只允许来自服务端白名单（seed → prompt），防止该免登录接口被用来任意刷 Key。 */
 const SKILLS_DIR = path.join(__dirname, "public", "skills");
 try { fs.mkdirSync(SKILLS_DIR, { recursive: true }); } catch (e) {}
+const _skillInflight = new Map(); // seed → 进行中的生成 Promise（并发去重）
+
+const SKILL_PROMPTS = {
+  "y2k-chrome": "Y2K 3D glossy chrome metallic pink blue gradient spheres, millennium futuristic aesthetic, shiny plastic bubbles, ultra vibrant, cute cyber aesthetic, studio lighting, high quality",
+  "japanese-summer": "Japanese summer MV aesthetic, golden sunlight through green leaves, soft film grain, lens flare, blue sky and clouds, warm nostalgic tone, cinematic",
+  "vogue-editorial": "Vogue magazine style fashion editorial, minimalist composition, dramatic lighting, elegant model, clean background, high contrast, cinematic color grading, professional photography",
+  "jojo-transform": "JOJO anime style transformation scene, dynamic pose, bold outlines, neon pop colors, dramatic action, stylized manga aesthetic, vibrant pink and teal, expressive characters",
+  "cyberpunk-tokyo": "Cyberpunk street photography, rainy night, neon signs reflecting on wet streets, futuristic Tokyo, purple and pink glow, cinematic wide angle, moody atmosphere",
+  "xianxia-mist": "Chinese ancient xianxia drama, elegant white-robed swordsman standing on misty mountain peak, ink wash painting aesthetic, bamboo forest, soft fog, ethereal atmosphere",
+  "basketball-summer": "Youth campus drama scene, sunny basketball court, blue sky with white clouds, cherry blossom petals falling, warm sunlight, nostalgic atmosphere",
+  "enchanted-forest": "Enchanted forest with glowing fairy lights, fireflies floating, dreamy bokeh, magical atmosphere, deep green foliage, soft golden light rays, whimsical fantasy",
+  "aerial-mountain": "Aerial drone cinematography, sweeping landscape shot, golden hour, mountain vista with winding river, cinematic wide angle, epic scale, professional",
+  "mecha-transform": "Giant mecha robot transformation, metallic armor plates, sparks and energy effects, dramatic smoke, cinematic lighting, futuristic battlefield, explosive action",
+  "soda-splash": "Commercial soda advertisement, ice cold soda can with water droplets splashing, bright summer blue sky, refreshing lemon and ice cubes, vibrant colors, product photography",
+  "hiphop-neon": "Hip hop rap music video scene, neon-lit city street at night, rapper with mic, dynamic camera angle, colorful graffiti wall, energetic mood, cinematic lighting",
+  "piano-tears": "Emotional piano music video, close up of black and white piano keys, soft spotlight, melancholic atmosphere, dark concert hall, moody cinematic lighting",
+  "feature-flow": "AI film production, clapperboard, cinematic, movie set, professional filmmaking, high quality",
+  "feature-canvas": "digital art canvas, creative painting, software interface, modern design tool, colorful brushes",
+  "feature-script": "movie script, screenplay writing, film storyboard, desk with papers, professional screenwriter",
+  "feature-assets": "digital asset library, 3D models warehouse, organized storage, character avatars on shelves, futuristic",
+  "gal-city-race": "cinematic city at night, fast car racing, neon lights, motion blur, commercial TVC style, epic",
+  "gal-desert-city": "ancient ruined city in desert, mysterious atmosphere, cinematic wide shot, adventure, dust, epic lighting",
+  "gal-bamboo-girl": "Chinese traditional bamboo flute, mountain landscape with mist, ink wash style, elegant, soft light, MV scene",
+  "gal-night-diner": "cozy Japanese diner at night, warm lantern light, steam rising from food, intimate atmosphere, cinematic",
+  "gal-galaxy-travel": "galaxy space exploration, star trails, nebula colors, spaceship, wonder cosmic background, epic scale",
+  "gal-robot-awaken": "cyborg robot awakening, glowing blue eyes, metallic body, sparks, sci-fi laboratory, dramatic lighting",
+  "gal-cyber-market": "cyberpunk night market, neon signs, asian street food, rain reflections, crowd, futuristic, vibrant",
+  "gal-qingluan": "Chinese mythological phoenix bird, ancient legend, flying through clouds, traditional art style, golden feathers, epic",
+  "gal-soda-bubble": "refreshing soda bubbles, ice cold drink, summer blue sky, water droplets splashing, bright, cheerful, product ad",
+};
+
+/* 1x1 占位 JPEG（生成失败或无 Key 时兜底，避免 img 报错） */
+const PLACEHOLDER_JPG = Buffer.from(
+  "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Afw==",
+  "base64"
+);
+function sendPlaceholder(res, headers = {}) {
+  res.writeHead(200, {
+    "Content-Type": "image/jpeg",
+    "Content-Length": PLACEHOLDER_JPG.length,
+    "Cache-Control": "public, max-age=60", // 占位图短缓存，恢复后尽快重试
+    ...headers,
+  });
+  res.end(PLACEHOLDER_JPG);
+}
 
 function safeSeed(s) {
   return String(s || "skill").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
@@ -264,9 +349,10 @@ function safeSeed(s) {
 
 async function handleSkillImage(req, res, url) {
   const seed = safeSeed(url.searchParams.get("seed") || "skill");
-  const prompt = url.searchParams.get("prompt") || "";
-  const size = url.searchParams.get("size") || "1K";
-  const ratio = url.searchParams.get("ratio") || "1:1";
+  // prompt 只认服务端白名单；size/ratio 也走白名单
+  const prompt = SKILL_PROMPTS[seed] || "";
+  const size = IMG_SIZES.includes(url.searchParams.get("size")) ? url.searchParams.get("size") : "1K";
+  const ratio = RATIOS.includes(url.searchParams.get("ratio")) ? url.searchParams.get("ratio") : "1:1";
   const cacheFile = path.join(SKILLS_DIR, seed + ".jpg");
 
   // 1. 缓存命中 → 直接返回文件
@@ -281,52 +367,54 @@ async function handleSkillImage(req, res, url) {
     return fs.createReadStream(cacheFile).pipe(res);
   }
 
-  // 2. 没 prompt → 返回占位渐变 JPEG（纯色图，让 img 不报错）
-  if (!prompt || !AGNES_KEY) {
-    const placeholder = Buffer.from(
-      "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Afw==",
-      "base64"
-    );
-    res.writeHead(200, { "Content-Type": "image/jpeg", "Content-Length": placeholder.length });
-    return res.end(placeholder);
-  }
+  // 2. seed 不在白名单 / 未配置 Key → 返回占位 JPEG（不消耗 API 额度）
+  if (!prompt || !AGNES_KEY) return sendPlaceholder(res);
 
-  // 3. 调 Agnes 生图
-  try {
+  // 3. 调 Agnes 生图（同一 seed 并发请求只生成一次，其余等待结果）
+  if (_skillInflight.has(seed)) {
+    try { await _skillInflight.get(seed); } catch (e) {}
+    if (fs.existsSync(cacheFile)) {
+      const stat = fs.statSync(cacheFile);
+      res.writeHead(200, {
+        "Content-Type": "image/jpeg", "Content-Length": stat.size,
+        "Cache-Control": "public, max-age=86400", "X-Skill-Cache": "hit-after-wait",
+      });
+      return fs.createReadStream(cacheFile).pipe(res);
+    }
+    return sendPlaceholder(res);
+  }
+  const genPromise = (async () => {
     const r = await handleImage({ model: "agnes-image-2.1-flash", prompt, size, ratio });
     const imgUrl = r.json?.data?.[0]?.url || r.json?.data?.[0]?.b64_json;
     if (!imgUrl) throw new Error("Agnes 未返回图片: " + JSON.stringify(r.json).slice(0, 120));
 
     let buf;
     if (typeof imgUrl === "string" && imgUrl.startsWith("data:")) {
-      // base64 格式
-      buf = Buffer.from(imgUrl.split(",")[1] || "", "base64");
+      buf = Buffer.from(imgUrl.split(",")[1] || "", "base64"); // base64 格式
     } else {
-      // URL 格式：下载后缓存
-      const upstream = await fetch(imgUrl, { method: "GET" });
+      const upstream = await fetch(imgUrl, { method: "GET" }); // URL 格式：下载后缓存
       if (!upstream.ok) throw new Error("下载失败 " + upstream.status);
       buf = Buffer.from(await upstream.arrayBuffer());
     }
-
     fs.writeFileSync(cacheFile, buf);
-
-    res.writeHead(200, {
-      "Content-Type": "image/jpeg",
-      "Content-Length": buf.length,
-      "Cache-Control": "public, max-age=86400",
-      "X-Skill-Cache": "miss-generated",
-    });
-    return res.end(buf);
+  })();
+  _skillInflight.set(seed, genPromise);
+  try {
+    await genPromise;
   } catch (e) {
-    // 生成失败 → 返回占位 JPEG（但保留错误 header 方便排查）
+    _skillInflight.delete(seed);
     console.error("[skill-image]", seed, "生成失败:", e.message);
-    const placeholder = Buffer.from(
-      "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8Afw==",
-      "base64"
-    );
-    res.writeHead(200, { "Content-Type": "image/jpeg", "Content-Length": placeholder.length, "X-Skill-Error": e.message.slice(0, 80) });
-    return res.end(placeholder);
+    return sendPlaceholder(res, { "X-Skill-Error": e.message.slice(0, 80) });
   }
+  _skillInflight.delete(seed);
+  const stat = fs.statSync(cacheFile);
+  res.writeHead(200, {
+    "Content-Type": "image/jpeg",
+    "Content-Length": stat.size,
+    "Cache-Control": "public, max-age=86400",
+    "X-Skill-Cache": "miss-generated",
+  });
+  return fs.createReadStream(cacheFile).pipe(res);
 }
 
 /* ---------- HTTP 服务 ---------- */
@@ -347,6 +435,7 @@ const server = http.createServer(async (req, res) => {
 
   if (p === "/api/image" && req.method === "POST") {
     if (REQUIRE_LOGIN && !authUser(req)) return send(res, 401, { error: "请先登录后再生成" });
+    if (!rateLimit(req, "gen", 60, 60 * 60 * 1000)) return send(res, 429, { error: "生成过于频繁，请稍后再试" });
     try {
       const payload = await readBody(req);
       if (!payload.prompt) return send(res, 400, { error: "缺少 prompt" });
@@ -357,6 +446,7 @@ const server = http.createServer(async (req, res) => {
 
   if (p === "/api/video" && req.method === "POST") {
     if (REQUIRE_LOGIN && !authUser(req)) return send(res, 401, { error: "请先登录后再生成" });
+    if (!rateLimit(req, "gen", 60, 60 * 60 * 1000)) return send(res, 429, { error: "生成过于频繁，请稍后再试" });
     try {
       const payload = await readBody(req);
       if (!payload.prompt) return send(res, 400, { error: "缺少 prompt" });
@@ -383,6 +473,7 @@ const server = http.createServer(async (req, res) => {
 
   // ---- 账号：注册 / 登录 / 当前用户 / 登出 ----
   if (p === "/api/auth/register" && req.method === "POST") {
+    if (!rateLimit(req, "register", 10)) return send(res, 429, { error: "请求过于频繁，请 10 分钟后再试" });
     try {
       const { email, password } = await readBody(req);
       const mail = String(email || "").trim().toLowerCase();
@@ -404,6 +495,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (p === "/api/auth/login" && req.method === "POST") {
+    if (!rateLimit(req, "login", 20)) return send(res, 429, { error: "尝试次数过多，请 10 分钟后再试" });
     try {
       const { email, password } = await readBody(req);
       const mail = String(email || "").trim().toLowerCase();
@@ -466,25 +558,69 @@ const server = http.createServer(async (req, res) => {
     return send(res, 200, { ok: true });
   }
 
-  // ---- 静态文件 ----
+  // ---- 静态文件（白名单 + ETag 协商缓存 + gzip 压缩 + 分级 Cache-Control） ----
   let file = p === "/" ? "/index.html" : p;
   file = path.normalize(file).replace(/^(\.\.[\/\\])+/, "");
   const full = path.join(__dirname, file);
-  if (!full.startsWith(__dirname)) { res.writeHead(403); return res.end("Forbidden"); }
-  fs.readFile(full, (err, data) => {
-    if (err) { res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }); return res.end("Not Found"); }
-    const ext = path.extname(full).toLowerCase();
-    const mime = {
-      ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
-      ".css": "text/css; charset=utf-8", ".json": "application/json",
-      ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".mp4": "video/mp4",
-    }[ext] || "application/octet-stream";
-    // HTML 不缓存（发版即生效），其他资源缓存 1 小时
-    const cache = ext === ".html" ? "no-cache" : "public, max-age=3600";
-    res.writeHead(200, { "Content-Type": mime, "Cache-Control": cache });
-    res.end(data);
-  });
+  if (!isStaticAllowed(full)) { res.writeHead(403, SEC_HEADERS); return res.end("Forbidden"); }
+  serveStatic(req, res, full);
 });
+
+/* 静态访问白名单：根目录只允许这几个文件，其余仅放行 assets/ 与 public/ 目录。
+   config.json / users.json / .session_secret / server.js 等一律 403。 */
+const STATIC_ROOT_FILES = new Set(["/index.html", "/favicon.png", "/favicon.svg", "/logo.png"]);
+const STATIC_DIRS = [path.join(__dirname, "assets"), path.join(__dirname, "public")];
+function isStaticAllowed(full) {
+  if (!full.startsWith(__dirname)) return false;
+  const rel = path.relative(__dirname, full);
+  // 任何一段以 . 开头（.session_secret / .git / .env …）都拒绝
+  if (rel.split(path.sep).some(seg => seg.startsWith("."))) return false;
+  if (STATIC_ROOT_FILES.has("/" + rel)) return true;
+  return STATIC_DIRS.some(d => full.startsWith(d + path.sep));
+}
+
+const MIME = {
+  ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8", ".json": "application/json; charset=utf-8",
+  ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".mp4": "video/mp4",
+  ".woff2": "font/woff2", ".ico": "image/x-icon",
+};
+// 可 gzip 的文本类型
+const GZIP_EXTS = new Set([".html", ".js", ".css", ".json", ".svg"]);
+const GZIP_MIN = 1024; // 小于 1KB 压缩无意义
+
+function serveStatic(req, res, full) {
+  fs.stat(full, (err, st) => {
+    if (err || !st.isFile()) {
+      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", ...SEC_HEADERS });
+      return res.end("Not Found");
+    }
+    const ext = path.extname(full).toLowerCase();
+    const mime = MIME[ext] || "application/octet-stream";
+    const etag = `W/"${st.size}-${Math.floor(st.mtimeMs)}"`;
+    // HTML 不缓存（发版即生效）；其他资源缓存 7 天（URL 带 ?v= 版本号，改版即换 URL）
+    const cache = ext === ".html" ? "no-cache" : "public, max-age=604800";
+    const baseHeaders = { "Content-Type": mime, "Cache-Control": cache, "ETag": etag, ...SEC_HEADERS };
+
+    // 协商缓存命中 → 304
+    if (req.headers["if-none-match"] === etag) {
+      res.writeHead(304, baseHeaders);
+      return res.end();
+    }
+
+    const acceptGzip = /\bgzip\b/.test(req.headers["accept-encoding"] || "");
+    const stream = fs.createReadStream(full);
+    // 读流中途出错（如文件被删）→ 直接销毁响应，避免未捕获异常
+    stream.on("error", () => res.destroy());
+    if (acceptGzip && GZIP_EXTS.has(ext) && st.size >= GZIP_MIN) {
+      const gz = zlib.createGzip({ level: 6 });
+      res.writeHead(200, { ...baseHeaders, "Content-Encoding": "gzip", "Vary": "Accept-Encoding" });
+      return stream.pipe(gz).pipe(res);
+    }
+    res.writeHead(200, { ...baseHeaders, "Content-Length": st.size });
+    stream.pipe(res);
+  });
+}
 
 server.listen(PORT, () => {
   console.log(`AIGC Studio 已启动: http://localhost:${PORT}`);
