@@ -347,6 +347,26 @@ function safeSeed(s) {
   return String(s || "skill").replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 64);
 }
 
+/* 发送已缓存的 Skill 图片：长缓存 + ETag 协商缓存。
+   图片为固定资源（随版本库发布），URL 带 v= 版本号，可放心 immutable 一年。 */
+function sendSkillFile(req, res, cacheFile, cacheStatus) {
+  const stat = fs.statSync(cacheFile);
+  const etag = `W/"${stat.size.toString(16)}-${Math.floor(stat.mtimeMs).toString(16)}"`;
+  if ((req.headers["if-none-match"] || "") === etag) {
+    res.writeHead(304, { ETag: etag, "Cache-Control": "public, max-age=31536000, immutable" });
+    return res.end();
+  }
+  res.writeHead(200, {
+    "Content-Type": "image/jpeg",
+    "Content-Length": stat.size,
+    "Cache-Control": "public, max-age=31536000, immutable",
+    "ETag": etag,
+    "Last-Modified": stat.mtime.toUTCString(),
+    "X-Skill-Cache": cacheStatus,
+  });
+  return fs.createReadStream(cacheFile).pipe(res);
+}
+
 async function handleSkillImage(req, res, url) {
   const seed = safeSeed(url.searchParams.get("seed") || "skill");
   // prompt 只认服务端白名单；size/ratio 也走白名单
@@ -356,16 +376,7 @@ async function handleSkillImage(req, res, url) {
   const cacheFile = path.join(SKILLS_DIR, seed + ".jpg");
 
   // 1. 缓存命中 → 直接返回文件
-  if (fs.existsSync(cacheFile)) {
-    const stat = fs.statSync(cacheFile);
-    res.writeHead(200, {
-      "Content-Type": "image/jpeg",
-      "Content-Length": stat.size,
-      "Cache-Control": "public, max-age=86400", // 浏览器缓存 1 天
-      "X-Skill-Cache": "hit",
-    });
-    return fs.createReadStream(cacheFile).pipe(res);
-  }
+  if (fs.existsSync(cacheFile)) return sendSkillFile(req, res, cacheFile, "hit");
 
   // 2. seed 不在白名单 / 未配置 Key → 返回占位 JPEG（不消耗 API 额度）
   if (!prompt || !AGNES_KEY) return sendPlaceholder(res);
@@ -373,14 +384,7 @@ async function handleSkillImage(req, res, url) {
   // 3. 调 Agnes 生图（同一 seed 并发请求只生成一次，其余等待结果）
   if (_skillInflight.has(seed)) {
     try { await _skillInflight.get(seed); } catch (e) {}
-    if (fs.existsSync(cacheFile)) {
-      const stat = fs.statSync(cacheFile);
-      res.writeHead(200, {
-        "Content-Type": "image/jpeg", "Content-Length": stat.size,
-        "Cache-Control": "public, max-age=86400", "X-Skill-Cache": "hit-after-wait",
-      });
-      return fs.createReadStream(cacheFile).pipe(res);
-    }
+    if (fs.existsSync(cacheFile)) return sendSkillFile(req, res, cacheFile, "hit-after-wait");
     return sendPlaceholder(res);
   }
   const genPromise = (async () => {
@@ -407,14 +411,8 @@ async function handleSkillImage(req, res, url) {
     return sendPlaceholder(res, { "X-Skill-Error": e.message.slice(0, 80) });
   }
   _skillInflight.delete(seed);
-  const stat = fs.statSync(cacheFile);
-  res.writeHead(200, {
-    "Content-Type": "image/jpeg",
-    "Content-Length": stat.size,
-    "Cache-Control": "public, max-age=86400",
-    "X-Skill-Cache": "miss-generated",
-  });
-  return fs.createReadStream(cacheFile).pipe(res);
+  // 注意：新生成图为 Agnes 1K 原图，入库前应压缩（参考 public/skills 现有图片规格）
+  return sendSkillFile(req, res, cacheFile, "miss-generated");
 }
 
 /* ---------- HTTP 服务 ---------- */

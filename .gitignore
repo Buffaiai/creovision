@@ -15,6 +15,6 @@ users.json
 node_modules/
 server.log
 
-# AI 生成的 Skill 主题图缓存（首次访问自动生成，不入版本库）
-public/skills/*.jpg
-public/skills/*.png
+# Skill 主题图为固定资源（已压缩），随版本库发布
+# 如后续新增 seed 的临时图片，请手动加入版本控制
+

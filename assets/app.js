@@ -513,8 +513,10 @@ $("#clearWorks").addEventListener("click", () => {
 
 /* 主题图工具：走本地 /api/skill-image（首次调 Agnes AI 生成，之后本地缓存）。
    prompt 已收敛到服务端白名单（按 seed 查表），前端只传 seed，防止接口被滥用刷 Key。 */
+/* v= 图片版本号：压缩/更换封面图后 bump，即可击穿浏览器与 CDN 的 immutable 长缓存 */
+const SKILL_IMG_V = "2";
 const U = (seed, prompt, ratio = "1:1") =>
-  `/api/skill-image?seed=${encodeURIComponent(seed)}&ratio=${ratio}`;
+  `/api/skill-image?seed=${encodeURIComponent(seed)}&ratio=${ratio}&v=${SKILL_IMG_V}`;
 const skills = [
   { name: "Y2K 3D 千禧风", cat: "热门玩法", desc: "塑料光泽 × 金属糖果色",
     img: U("y2k-chrome", "Y2K 3D glossy chrome metallic pink blue gradient spheres, millennium futuristic aesthetic, shiny plastic bubbles, ultra vibrant, cute cyber aesthetic, studio lighting, high quality") },
@@ -556,7 +558,7 @@ function renderSkills() {
   $("#skillCards").innerHTML = list.map((s, i) => `
     <div class="skill-card" onclick="useSkill('${s.name}')">
       <div class="thumb" style="${grad(i, 3)}">
-        <img src="${s.img}" loading="lazy" onerror="_imgFallback(this,${i})" alt="">
+        <img src="${s.img}" loading="lazy" decoding="async"${i === 0 ? ' fetchpriority="high"' : ""} onerror="_imgFallback(this,${i})" alt="">
         <div class="thumb-grad"></div>
         <span class="cat-tag">${s.cat}</span>
       </div>
@@ -598,7 +600,7 @@ const features = [
 $("#features").innerHTML = features.map((f, i) => `
   <div class="feature" onclick="toast('「${f.t}」模块开发中，敬请期待')">
     <div class="f-thumb" style="${grad(i+3, 5)}">
-      <img src="${f.img}" loading="lazy" onerror="_imgFallback(this,${i+3})" alt="">
+      <img src="${f.img}" loading="lazy" decoding="async" onerror="_imgFallback(this,${i+3})" alt="">
       <span class="f-icon">${f.icon}</span>
     </div>
     <h4>${f.t}</h4><p>${f.d}</p>
@@ -630,7 +632,7 @@ function renderGallery() {
   $("#galleryGrid").innerHTML = list.map((w, i) => `
     <div class="gcard" onclick="toast('播放《${w.t}》· 示例作品')">
       <div class="cover" style="${grad(i+2, cat.length)}">
-        <img src="${w.img}" loading="lazy" onerror="_imgFallback(this,${i+2})" alt="">
+        <img src="${w.img}" loading="lazy" decoding="async" onerror="_imgFallback(this,${i+2})" alt="">
         <span class="badge">${w.cat}</span>
         <span class="play">▶</span>
       </div>
